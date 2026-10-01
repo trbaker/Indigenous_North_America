@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-HZWNB3WHS6"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-HZWNB3WHS6');
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Indigenous North America</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
+<style>
+/* GeoInquiries Lab — engine stylesheet (from "A Nation Divided", final state).
+   Theme tokens below can be overridden per activity via ACTIVITY.theme. */
+:root{
+  --ink:#1B2A3C;
+  --ink-soft:#4A5768;
+  --sheet:#EEF1EC;
+  --panel:#FFFFFF;
+  --rule:#CFD6D0;
+  --header:#1B2A3C;        /* header background (Nation Divided: navy) */
+  --header-rule:#B4842D;   /* header bottom border */
+  --accent:#1B2A3C;        /* primary buttons, active layer state, mode pill active */
+  --accent-hover:#2A3E56;
+  --brass:#B4842D;
+  --brass-text:#8A6520;    /* 5.3:1 on white, for brass-coloured text */
+  --brass-light:#D9A84A;   /* 6.7:1 under navy text, for badge and toast fills */
+  --ok:#2F7D4F;
+  --ok-soft:#DDEFE3;
+  --warn:#A83A2A;
+  --warn-soft:#F5DCD7;
+  --border-soft:#F5EBC6;
+  --callout:#F3F1E8;
+  --serif:"Old Standard TT", Georgia, "Times New Roman", serif;
+  --sans:"Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif;
+  --rail:420px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{
+  font-family:var(--sans);font-size:16px;line-height:1.5;color:var(--ink);background:var(--sheet);
+  display:flex;flex-direction:column;min-height:100vh;
+}
+a{color:#2E5E9E}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,[tabindex]:focus-visible{
+  outline:3px solid var(--brass);outline-offset:2px;
+}
+.visually-hidden{
+  position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+  clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;
+}
+
+/* ---------- Top bar ---------- */
+header.topbar{
+  position:relative;
+  display:flex;align-items:center;gap:14px;
+  padding:8px 236px 8px 16px;   /* right padding reserves the corner for the mode switch */
+  background:var(--header);color:#fff;
+  border-bottom:4px solid var(--header-rule);
+  flex-wrap:wrap;
+}
+.topbar .logo{display:block;flex:0 0 auto;line-height:0;border-radius:8px}
+.topbar .logo img{width:48px;height:48px;display:block}
+.topbar .logo:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+.topbar h1{font-family:var(--serif);font-weight:700;font-size:1.35rem;line-height:1.1;margin:0;letter-spacing:.01em}
+.topbar h1 small{display:block;font-family:var(--sans);font-weight:400;font-size:.8rem;opacity:.85;margin-top:2px}
+.hud{margin-left:auto;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.score{font-family:var(--serif);font-size:1.5rem;line-height:1;display:flex;align-items:baseline;gap:8px}
+.score span{font-family:var(--sans);font-size:.8rem;opacity:.9}
+.badges{display:flex;gap:6px}
+.badge{
+  width:34px;height:34px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.35);
+  display:grid;place-items:center;font-size:.85rem;
+  font-family:var(--serif);font-weight:700;
+  color:rgba(255,255,255,.65);
+  position:relative;
+}
+.badge.earned{background:var(--brass-light);border-color:var(--brass-light);color:var(--ink)}
+/* Mode switch: pinned to the upper-right corner, styled as a light pill so it
+   reads as a mode selector rather than one of the outlined action buttons. */
+.mode-switch{
+  position:absolute;top:10px;right:20px;z-index:2;
+  display:flex;padding:3px;gap:2px;
+  background:var(--sheet);border-radius:999px;
+  box-shadow:0 1px 3px rgba(0,0,0,.35), inset 0 0 0 1px rgba(27,42,60,.15);
+}
+.mode-switch button{
+  background:transparent;color:var(--ink);border:0;border-radius:999px;
+  padding:5px 16px;font-size:.9rem;font-weight:700;letter-spacing:.01em;line-height:1.3;
+}
+.mode-switch button[aria-pressed="true"]{
+  background:var(--accent);color:#fff;
+  box-shadow:0 1px 2px rgba(0,0,0,.3);
+}
+.mode-switch button:hover:not([aria-pressed="true"]){background:rgba(27,42,60,.1)}
+.mode-switch button:focus-visible{outline:3px solid var(--brass);outline-offset:1px}
+.topbar .tools{display:flex;gap:6px;flex-wrap:wrap}
+.topbar .tools button{
+  background:transparent;color:#fff;border:1px solid rgba(255,255,255,.5);
+  padding:6px 12px;border-radius:4px;font-size:.9rem;
+}
+.topbar .tools button:hover{background:rgba(255,255,255,.14)}
+body.mode-explore .hud .score,
+body.mode-explore .hud .badges{display:none}
+body.mode-explore .rail{display:none}
+body.mode-explore .map-banner{display:none}
+body.mode-explore .tools #btnHelp,
+body.mode-explore .tools #btnSources,
+body.mode-explore .tools #btnTeacher,
+body.mode-explore .tools #btnReset{display:none}
+
+/* ---------- Main layout ---------- */
+main{flex:1;display:flex;min-height:0}
+.rail{
+  width:var(--rail);flex:0 0 var(--rail);background:var(--panel);border-right:1px solid var(--rule);
+  display:flex;flex-direction:column;min-height:0;
+}
+.rail-head{
+  display:flex;align-items:center;justify-content:space-between;padding:6px 12px 6px 16px;
+  border-bottom:1px solid var(--rule);background:#F7F8F6;font-family:var(--serif);font-weight:700;
+}
+.progress{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--rule)}
+.progress button{
+  background:none;border:0;border-bottom:4px solid transparent;padding:10px 4px 8px;font-size:.85rem;color:var(--ink-soft);
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+}
+.progress button b{font-family:var(--serif);font-size:1rem;color:var(--ink)}
+.progress button.current,.progress button[aria-current="step"]{border-bottom-color:var(--brass);color:var(--ink)}
+.progress button.done b::after{content:" ✓";color:var(--ok)}
+.progress button:disabled{opacity:.45;cursor:not-allowed}
+
+.mission{flex:1;overflow:auto;padding:22px 24px 30px}
+.mission h2{font-family:var(--serif);font-size:1.7rem;line-height:1.15;margin:0 0 4px;font-weight:700}
+.mission .question-head{font-family:var(--serif);font-style:italic;font-size:1.15rem;color:var(--ink-soft);margin:0 0 16px}
+.mission p{margin:0 0 12px;max-width:62ch}
+.steps{margin:0 0 16px;padding:0;list-style:none}
+.steps li{padding:8px 10px 8px 14px;border-left:3px solid var(--rule);margin-bottom:6px;background:#F7F8F6}
+.steps li.active{border-left-color:var(--brass);background:var(--border-soft)}
+.steps li.done{border-left-color:var(--ok);color:var(--ink-soft)}
+.task{border:1px solid var(--rule);border-radius:6px;padding:16px;margin:0 0 14px;background:#fff}
+.task h3{font-family:var(--serif);font-size:1.15rem;margin:0 0 8px;font-weight:700}
+.task .pts{float:right;font-size:.8rem;color:var(--brass-text);font-weight:600}
+.choices{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.choices button,.choices label{
+  text-align:left;background:#fff;border:1px solid #7F8A97;border-radius:6px;padding:10px 12px;color:var(--ink);
+  line-height:1.35;display:flex;gap:10px;align-items:flex-start;
+}
+.choices button:hover{border-color:var(--ink);background:#F7F8F6}
+.choices button.correct{border-color:var(--ok);background:var(--ok-soft)}
+.choices button.wrong{border-color:var(--warn);background:var(--warn-soft)}
+.choices button:disabled{cursor:default}
+.choices input[type=checkbox]{margin-top:4px}
+.choices.inline{flex-direction:row;flex-wrap:wrap}
+.choices.inline button{padding:6px 12px}
+.feedback{margin-top:10px;padding:10px 12px;border-radius:6px;font-size:.95rem;background:#F7F8F6;border:1px solid var(--rule)}
+.feedback.good{background:var(--ok-soft);border-color:var(--ok)}
+.feedback.bad{background:var(--warn-soft);border-color:var(--warn)}
+.primary{background:var(--accent);color:#fff;border:0;border-radius:6px;padding:10px 16px;font-weight:600}
+.primary:hover{background:var(--accent-hover)}
+.primary:disabled{background:#9AA3AE;cursor:not-allowed}
+.secondary{background:#fff;color:var(--ink);border:1px solid var(--ink);border-radius:6px;padding:9px 14px;font-weight:600}
+.secondary:hover{background:#F7F8F6}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input[type=number],input[type=text],textarea,select.answer{font:inherit;padding:8px 10px;border:1px solid var(--rule);border-radius:6px;width:100%;background:#fff;color:var(--ink)}
+input[type=number]{width:120px}
+textarea{min-height:130px;resize:vertical}
+.hint{font-size:.9rem;color:var(--ink-soft)}
+.chip{display:inline-block;padding:2px 9px;border-radius:12px;font-size:.8rem;font-weight:600;background:#EDEFEA;color:var(--ink)}
+.name-card{border-left:4px solid var(--brass);padding:10px 14px;background:#FBFAF6;margin-top:10px}
+.name-card h4{font-family:var(--serif);margin:0 0 4px;font-size:1.1rem}
+.name-card .meta{font-size:.9rem;color:var(--ink-soft);margin-bottom:6px}
+.order-list{list-style:none;padding:0;margin:10px 0}
+.order-list li{display:flex;align-items:center;gap:8px;border:1px solid var(--rule);border-radius:6px;padding:8px 10px;margin-bottom:6px;background:#fff}
+.order-list li .num{font-family:var(--serif);font-weight:700;width:1.5em;color:var(--brass-text)}
+.order-list li .mv{margin-left:auto;display:flex;gap:4px}
+.order-list li .mv button{border:1px solid var(--rule);background:#fff;border-radius:4px;padding:2px 8px}
+.order-list li.right{border-color:var(--ok);background:var(--ok-soft)}
+.order-list li.wrong{border-color:var(--warn);background:var(--warn-soft)}
+.summary-box{background:#F7F8F6;border:1px solid var(--rule);border-radius:6px;padding:14px;margin-top:10px}
+.summary-box dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
+.summary-box dt{color:var(--ink-soft)}
+.summary-box dd{margin:0;font-weight:600}
+.callout{background:var(--callout);border-left:4px solid var(--accent);padding:10px 14px;border-radius:0 6px 6px 0;margin:0 0 14px}
+.callout b{font-family:var(--serif)}
+
+/* ---------- Map ---------- */
+.mapwrap{flex:1;position:relative;min-width:0;min-height:0}
+#viewDiv{position:absolute;inset:0}
+.maptools{
+  position:absolute;top:12px;right:12px;z-index:5;
+  display:flex;flex-direction:column;gap:6px;align-items:flex-end;
+}
+.maptools button{
+  background:#fff;border:1px solid var(--rule);border-radius:6px;padding:6px 10px;font-size:.9rem;
+  box-shadow:0 1px 4px rgba(0,0,0,.15);color:var(--ink);
+}
+.maptools select{
+  background:#fff;border:1px solid var(--rule);border-radius:6px;padding:6px 10px;font-size:.9rem;
+  box-shadow:0 1px 4px rgba(0,0,0,.15);color:var(--ink);font-family:var(--sans);min-width:220px;
+}
+.maptools .measure-btn{
+  width:32px;height:32px;padding:0;border-radius:2px;display:grid;place-items:center;
+  font-size:16px;color:#6e6e6e;background:#fff;border:1px solid rgba(110,110,110,.3);
+}
+.maptools .measure-btn:hover{background:#f3f3f3;color:#2e2e2e}
+.maptools .measure-btn.on{background:#e8e8e8;color:#151515;border-color:#a8a8a8;box-shadow:inset 0 0 0 1px #a8a8a8}
+.layers-panel{
+  background:rgba(255,255,255,.97);border:1px solid var(--rule);border-radius:6px;
+  box-shadow:0 1px 4px rgba(0,0,0,.15);min-width:220px;overflow:hidden;
+}
+.layers-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:6px 8px 6px 12px;background:var(--accent);color:#fff;font-family:var(--serif);font-weight:700;
+}
+.layers-head button{
+  background:transparent;color:#fff;border:1px solid rgba(255,255,255,.45);border-radius:4px;
+  padding:2px 8px;font-size:.8rem;box-shadow:none;
+}
+.panel-body{padding:8px}
+.panel-body.collapsed{display:none}
+.bookmarks-panel select{width:100%;min-width:0;box-shadow:none}
+.layers-list{list-style:none;margin:0;padding:6px 8px}
+.layers-list.collapsed{display:none}
+.layers-list li label{
+  display:flex;align-items:center;gap:8px;padding:5px 4px;border-radius:4px;cursor:pointer;font-size:.92rem;
+}
+.layers-list li label:hover{background:#F2F4F0}
+.layers-list li label.unavailable{color:var(--ink-soft);font-style:italic}
+.layers-list input{width:16px;height:16px;margin:0;accent-color:var(--accent)}
+.legend{
+  position:absolute;left:12px;bottom:12px;z-index:5;
+  background:rgba(255,255,255,.97);border:1px solid var(--rule);border-radius:6px;
+  font-size:.85rem;min-width:200px;max-width:240px;overflow:hidden;
+  box-shadow:0 1px 4px rgba(0,0,0,.15);
+}
+.legend-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:6px 8px 6px 12px;background:var(--accent);color:#fff;font-family:var(--serif);font-weight:700;font-size:1rem;
+}
+.legend-head button{
+  background:transparent;color:#fff;border:1px solid rgba(255,255,255,.45);border-radius:4px;
+  padding:2px 8px;font-size:.8rem;
+}
+.legend-body{padding:8px 12px 10px;max-height:40vh;overflow:auto}
+.legend-body.collapsed{display:none}
+.legend-body:empty::before{content:"Turn on a layer to see its legend.";color:var(--ink-soft);font-style:italic}
+.legend h5{font-family:var(--serif);font-size:.95rem;margin:6px 0 4px}
+.legend h5:first-child{margin-top:0}
+.legend-body div{display:flex;align-items:center;gap:8px;margin:3px 0}
+.sw{width:16px;height:12px;border:1px solid rgba(0,0,0,.25);flex:0 0 auto}
+.sw.dot{width:12px;height:12px;border-radius:50%}
+.sw.sq{width:12px;height:12px;border-radius:1px}
+.sw.dia{width:12px;height:12px;transform:rotate(45deg)}
+.sw.tri{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:12px solid #6E6E6E;background:transparent;border-top:0}
+.sw.line{border:0;border-top:3px dashed #2E5E9E;height:0}
+.sw.cross{border:0;background:transparent;font-weight:900;text-align:center;line-height:12px;font-size:16px}
+.sw.note{width:14px;height:14px;border-radius:3px;background:#fff;border:2px solid var(--accent)}
+.mapstatus{
+  position:absolute;right:12px;bottom:12px;z-index:5;font-size:.8rem;
+  background:rgba(255,255,255,.95);border:1px solid var(--rule);border-radius:6px;padding:5px 9px;max-width:300px;
+}
+.mapstatus.err{border-color:var(--warn);background:var(--warn-soft)}
+.mapstatus:empty{display:none}
+.map-banner{
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:5;
+  background:var(--accent);color:#fff;padding:8px 14px;border-radius:6px;font-size:.95rem;
+  max-width:min(480px,55%);text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.25);
+  display:none;
+}
+.map-banner.show{display:block}
+.map-banner b{font-family:var(--serif)}
+.map-error{position:absolute;inset:0;display:none;place-items:center;background:var(--sheet);z-index:4;padding:20px}
+.map-error.show{display:grid}
+.map-error div{max-width:520px;background:#fff;border:1px solid var(--rule);border-radius:8px;padding:20px}
+
+/* ---------- Modal ---------- */
+.modal-back{position:fixed;inset:0;background:rgba(27,42,60,.55);z-index:100;display:none;place-items:center;padding:20px}
+.modal-back.show{display:grid}
+.modal{background:#fff;border-radius:8px;max-width:760px;width:100%;max-height:90vh;overflow:auto;padding:26px 28px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.modal h2{font-family:var(--serif);margin:0 0 10px;font-size:1.6rem}
+.modal h3{font-family:var(--serif);margin:18px 0 6px;font-size:1.15rem}
+.modal p,.modal li{max-width:70ch}
+.modal .close{float:right}
+.modal table{border-collapse:collapse;width:100%;font-size:.9rem}
+.modal td,.modal th{border-bottom:1px solid var(--rule);padding:6px 8px;text-align:left;vertical-align:top}
+.modal code{font-size:.85em;word-break:break-all}
+.modal .modal-footer{margin-top:22px;border-top:1px solid var(--rule);padding-top:14px;text-align:center}
+.modal .modal-footer p{max-width:none;margin:0 0 10px}
+.modal .modal-footer p.footer-left{text-align:left;margin-bottom:6px}
+.modal .modal-footer p.footer-left + .policy-links{margin-top:14px}
+.modal .policy-links{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;margin:0 0 18px;font-size:.95rem}
+.modal .cc-badge{text-align:center;margin:0}
+.modal .cc-badge a{display:inline-block;line-height:0}
+.modal .cc-badge img{width:88px;height:31px}
+.toast{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:24px;z-index:120;
+  background:var(--brass-light);color:var(--ink);font-weight:700;padding:10px 18px;border-radius:24px;
+  box-shadow:0 4px 16px rgba(0,0,0,.3);opacity:0;transition:opacity .25s;pointer-events:none;
+  font-family:var(--serif);font-size:1.05rem;
+}
+.toast.show{opacity:1}
+
+@media (max-width: 900px){
+  header.topbar{padding-right:20px;padding-top:50px}
+  .mode-switch{top:10px;right:12px}
+  main{flex-direction:column}
+  .rail{width:auto;flex:1 1 auto;border-right:0;border-top:1px solid var(--rule);order:2;max-height:55vh}
+  .mapwrap{order:1;height:45vh;flex:0 0 45vh}
+  .topbar h1{font-size:1.1rem}
+  .legend{max-width:180px;font-size:.78rem}
+}
+@media (prefers-reduced-motion: reduce){ .toast{transition:none} }
+
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="logo" id="logoLink" href="https://trbaker.github.io/geoinquiries/" target="_blank" rel="noopener"><img id="logoImg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCIgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByb2xlPSJpbWciIGFyaWEtbGFiZWw9Ikdlb0lucXVpcmllcyBMYWIiPgogIDxyZWN0IHg9IjIiIHk9IjIiIHdpZHRoPSI0NCIgaGVpZ2h0PSI0NCIgcng9IjkiIGZpbGw9IiNGM0Y2RjQiLz4KICA8cGF0aCBkPSJNOCAzNCBMMjAgMjggTDMwIDMzIEw0MCAyNyBMNDAgMzggTDMwIDQyIEwyMCAzNyBMOCA0MiBaIiBmaWxsPSIjQzlENUNFIi8+CiAgPHBhdGggZD0iTTggMzQgTDIwIDI4IEwzMCAzMyBMNDAgMjciIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzJGNkU1MiIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KICA8Y2lyY2xlIGN4PSIxOSIgY3k9IjE3IiByPSI3LjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE3MjgzQSIgc3Ryb2tlLXdpZHRoPSIzIi8+CiAgPGxpbmUgeDE9IjI0LjUiIHkxPSIyMi41IiB4Mj0iMzEiIHkyPSIyOSIgc3Ryb2tlPSIjMTcyODNBIiBzdHJva2Utd2lkdGg9IjMuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPHBhdGggZD0iTTM1IDggYy0zLjYgMCAtNiAyLjYgLTYgNS44IDAgNC4yIDYgMTAuMiA2IDEwLjIgczYgLTYgNiAtMTAuMiBDNDEgMTAuNiAzOC42IDggMzUgOCB6IiBmaWxsPSIjRDk2MDNBIi8+CiAgPGNpcmNsZSBjeD0iMzUiIGN5PSIxNCIgcj0iMi4zIiBmaWxsPSIjZmZmIi8+Cjwvc3ZnPgo=" alt="GeoInquiries 2.0" width="48" height="48"></a>
+  <h1 id="appTitle">Indigenous North America<small id="appSubtitle">Based on the National Geographic MapMaker lesson · Indigenous territories, biomes and land</small></h1>
+  <div class="mode-switch" role="group" aria-label="Map mode">
+    <button type="button" id="modeMission" aria-pressed="true">GeoInquiry</button>
+    <button type="button" id="modeExplore" aria-pressed="false">Explore</button>
+  </div>
+  <div class="hud">
+    <div class="score"><span id="scoreVal">0</span> <span>points</span></div>
+    <div class="badges" id="badges" role="list" aria-label="Section badges"></div>
+    <div class="tools">
+      <button id="btnHelp" type="button">How to play</button>
+      <button id="btnSources" type="button">Sources</button>
+      <button id="btnTeacher" type="button">Teacher notes</button>
+      <button id="btnReset" type="button">Reset</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <aside class="rail" aria-label="GeoInquiry">
+    <div class="rail-head"><span>GeoInquiry</span></div>
+    <nav class="progress" id="progressNav" aria-label="GeoInquiry progress"></nav>
+    <section class="mission" id="mission" aria-live="polite"></section>
+  </aside>
+
+  <section class="mapwrap" aria-label="Map">
+    <div id="viewDiv"></div>
+    <div class="map-banner" id="mapBanner"></div>
+    <div class="maptools" id="mapTools">
+      <div class="layers-panel bookmarks-panel" id="bookmarksPanel" hidden>
+        <div class="layers-head"><span>Bookmarks</span><button type="button" id="bookmarksToggle" aria-expanded="true" aria-controls="bookmarksBody">Hide</button></div>
+        <div class="panel-body" id="bookmarksBody"><select id="bookmarks" aria-label="Bookmarks"></select></div>
+      </div>
+      <div class="layers-panel" id="layersPanel">
+        <div class="layers-head"><span>Layers</span><button type="button" id="layersToggle" aria-expanded="true" aria-controls="layersList">Hide</button></div>
+        <ul class="layers-list" id="layersList"></ul>
+      </div>
+      <button type="button" id="btnMeasure" class="measure-btn" title="Measure distance" aria-label="Measure distance" aria-pressed="false" hidden><span class="esri-icon-measure-line" aria-hidden="true"></span></button>
+    </div>
+    <div class="legend" id="legendBox">
+      <div class="legend-head"><span>Legend</span><button type="button" id="legendToggle" aria-expanded="true" aria-controls="legend">Hide</button></div>
+      <div class="legend-body" id="legend"></div>
+    </div>
+    <div class="mapstatus" id="mapStatus" role="status">Loading map</div>
+    <div class="map-error" id="mapError">
+      <div>
+        <h3 style="font-family:var(--serif);margin-top:0">The map could not load</h3>
+        <p>This app loads the ArcGIS Maps SDK for JavaScript from <code>js.arcgis.com</code> and data from ArcGIS Online. Check that your network allows those sites, then reload. The GeoInquiry questions still work without the map, but map-based tasks will be skipped.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="modal-back" id="modalBack" role="dialog" aria-modal="true">
+  <div class="modal" id="modalBody"></div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://js.arcgis.com/4.30/"></script>
+<script>
+/* =====================================================================
+   GeoInquiries Lab activity: "Indigenous North America"
+   Based on the National Geographic MapMaker / Esri lesson of the same name
+   (web map a19c24b3a1d9446fa4329d4477cded1c).
+   Build:  node build.js activities/indigenous-north-america.js
+   ===================================================================== */
+(function(){
+const esc=(s)=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------------------------------------------------------------------
+   LIVE SERVICES (from the lesson's web map, verified October 2026)
+   --------------------------------------------------------------------- */
+const TERR_URL="https://services7.arcgis.com/iFGeGXTAJXnjq0YN/arcgis/rest/services/Indigenous_Territories_of_North_America_view_by_JS/FeatureServer/0";
+const RIVERS_URL="https://services7.arcgis.com/xuAg12SDp2ow0Fb8/arcgis/rest/services/ne_10m_rivers_lake_centerlines/FeatureServer/0";
+const BIOMES_URL="https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/Resolve_Ecoregions/FeatureServer/0";
+
+// Biome colours = the service's own unique-value renderer (field BIOME_NAME)
+const BIOME_LEGEND=[
+  ["Tundra","#9BCFBC"],["Boreal Forests/Taiga","#73B2FF"],["Temperate Conifer Forests","#5C8944"],
+  ["Temperate Broadleaf & Mixed Forests","#00734C"],["Temperate Grasslands, Savannas & Shrublands","#FFFF73"],
+  ["Mediterranean Forests, Woodlands & Scrub","#FF0000"],["Deserts & Xeric Shrublands","#FF7F7F"],
+  ["Flooded Grasslands & Savannas","#BDF3FC"],["Montane Grasslands & Shrublands","#D7C29E"],
+  ["Tropical & Subtropical Coniferous Forests","#A5F57A"],["Tropical & Subtropical Dry Broadleaf Forests","#CDCD66"],
+  ["Tropical & Subtropical Grasslands, Savannas & Shrublands","#FFAA00"],["Tropical & Subtropical Moist Broadleaf Forests","#3DB800"],
+  ["Mangroves","#FF00C5"],["Rock and Ice","#FFEBBE"]
+].map(([label,color])=>({label,color,shape:"square"}));
+
+// Generalized major rivers: built-in substitute used only if the river service is down.
+// Vertices follow cities and landmarks on each river; shapes are simplified.
+const RIVERS=[
+  {n:"Mississippi",p:[[-95.2,47.2],[-93.27,44.98],[-91.25,43.8],[-90.66,42.5],[-90.6,41.5],[-91.4,40.4],[-90.18,38.63],[-89.18,37.0],[-90.05,35.15],[-91.15,33.4],[-90.9,32.35],[-91.19,30.45],[-90.07,29.95],[-89.25,29.15]]},
+  {n:"Missouri",p:[[-111.55,45.93],[-111.3,47.5],[-106.4,48.0],[-103.6,48.15],[-100.8,46.8],[-100.35,44.37],[-96.4,42.5],[-95.93,41.26],[-94.6,39.1],[-92.17,38.58],[-90.12,38.8]]},
+  {n:"Ohio",p:[[-80.0,40.44],[-80.72,40.06],[-82.44,38.42],[-84.51,39.1],[-85.76,38.25],[-87.57,37.97],[-89.18,37.0]]},
+  {n:"Tennessee",p:[[-83.92,35.96],[-85.31,35.05],[-86.6,34.6],[-87.7,34.8],[-88.15,36.5],[-88.6,37.08]]},
+  {n:"Arkansas",p:[[-106.3,39.25],[-104.6,38.27],[-100.0,37.75],[-97.33,37.69],[-95.99,36.15],[-94.42,35.39],[-92.27,34.75],[-91.1,33.8]]},
+  {n:"Rio Grande",p:[[-107.3,37.8],[-106.65,35.08],[-106.48,31.76],[-103.2,29.2],[-100.9,29.37],[-99.5,27.5],[-97.5,25.9],[-97.15,25.95]]},
+  {n:"Colorado",p:[[-105.8,40.25],[-108.55,39.07],[-109.55,38.57],[-111.47,36.93],[-112.1,36.1],[-114.74,36.02],[-114.6,34.85],[-114.62,32.72],[-114.8,31.8]]},
+  {n:"Columbia",p:[[-115.86,50.2],[-118.2,51.0],[-117.66,49.3],[-118.98,47.96],[-120.31,47.42],[-119.1,46.23],[-121.18,45.6],[-122.67,45.6],[-123.83,46.19]]},
+  {n:"Snake",p:[[-110.76,43.48],[-112.03,43.49],[-114.46,42.6],[-116.9,43.8],[-116.7,45.2],[-117.03,46.42],[-119.05,46.2]]},
+  {n:"Sacramento",p:[[-122.39,40.59],[-121.5,38.58],[-121.9,38.05],[-122.4,37.8]]},
+  {n:"St. Lawrence",p:[[-76.48,44.23],[-73.55,45.5],[-72.54,46.34],[-71.2,46.8],[-69.7,48.14],[-66,49.2]]}
+];
+
+// Bookmarks: the lesson names East, West, West Coast, South and Northeast.
+// These extents are also the boxes used to count territories in the answer keys.
+const BOOKMARKS=[
+  {name:"North America",xmin:-130,ymin:22,xmax:-62,ymax:56},
+  {name:"West Coast",xmin:-125,ymin:32,xmax:-117,ymax:49},
+  {name:"West",xmin:-117,ymin:31,xmax:-100,ymax:49},
+  {name:"South",xmin:-100,ymin:25,xmax:-78,ymax:35.5},
+  {name:"East",xmin:-91,ymin:34,xmax:-75,ymax:42},
+  {name:"Northeast",xmin:-80.5,ymin:39,xmax:-66.5,ymax:47.5},
+  {name:"Oklahoma",xmin:-103,ymin:33.5,xmax:-94,ymax:37.2}
+];
+const REGIONS=["West Coast","West","South","East","Northeast"];
+
+/* ---------------------------------------------------------------------
+   CUSTOM TASKS (map tools from the lesson: popups, bookmarks,
+   transparency, swipe, popups on two layers)
+   --------------------------------------------------------------------- */
+function card(api,t,extra){
+  return api.h(`<div class="task"><span class="pts">${t.points} pts</span><h3>${t.title}</h3><p>${t.text||""}</p>${extra||""}<div class="feedback" hidden></div></div>`);
+}
+const mapGone=(api,keys)=>api.map.failed||keys.some(k=>api.map.unavailable[k]);
+function skip(api,t,f,msg){ api.fb(f,false,msg||"The map layer is not available, so this task is skipped."); if(!api.taskDone(t.id)){ api.state.tasks[t.id]=true; api.save(); api.updateFinishBlock(); } }
+function pin(api,pt,text,color){
+  const G=api.map.modules&&api.map.modules.Graphic, L=api.map.layers.__game; if(!G||!L) return;
+  L.add(new G({geometry:pt,symbol:{type:"simple-marker",style:"circle",size:22,color:color||"#3D3D3D",outline:{color:"#fff",width:2}}}));
+  L.add(new G({geometry:pt,symbol:{type:"text",text:String(text),color:"#fff",font:{size:11,weight:"bold",family:"Source Sans 3"},yoffset:-4}}));
+}
+// Run cleanup when a task card leaves the page (section change or reset)
+function onDetach(el,fn){
+  const root=document.getElementById("mission"); if(!root) return;
+  const mo=new MutationObserver(()=>{ if(!el.isConnected){ mo.disconnect(); fn(); } });
+  mo.observe(root,{childList:true});
+}
+
+// 1. Read the layer description (lesson step 3)
+function layerInfo(container,api,t){
+  const c=card(api,t,`<div class="row"><button class="secondary" type="button">Read the layer description</button></div>`);
+  const f=c.querySelector(".feedback"); container.appendChild(c);
+  if(api.taskDone(t.id)) api.fb(f,true,"Done. You read the layer description.");
+  c.querySelector("button").addEventListener("click",()=>{
+    api.openModal(`<h2>Layer description: Indigenous Territories of North America</h2>
+      <p>This layer shows land claimed as the territory of different Indigenous Peoples. The shapes come from <a href="https://native-land.ca" target="_blank" rel="noopener">Native Land Digital</a>, a Canadian not-for-profit that maps Indigenous territories, languages and treaties with input from Indigenous communities.</p>
+      <ul>
+        <li>Each shape is one People's or community's territory. Some territories belong to large Nations; others to smaller, specific groups.</li>
+        <li>The layer includes lands that Indigenous Peoples were forced to move to after European settlers arrived.</li>
+        <li>Territories often overlap, because neighbouring Peoples shared, used or claimed the same land. That creates the "kaleidoscope" look of the map.</li>
+        <li>Each popup links to that People's page on Native Land Digital, where you can read more and see the sources.</li>
+      </ul>
+      <p><b>Disclaimer:</b> this map does not represent or intend to represent official or legal boundaries of any Indigenous Nation. To learn about definitive boundaries, contact the Nations in question.</p>`);
+    if(!api.taskDone(t.id)){ api.state.answers[t.id]="Read the layer description"; api.markTask(t.id,t.points,"points"); api.fb(f,true,"Done. You read the layer description."); }
+  });
+}
+
+// 2. Claim counter: click the map, count the territories under that spot (lesson step 5 + tip "1 of 5")
+function claimCounter(container,api,t){
+  const c=card(api,t,`<div class="claim-out" aria-live="polite"></div>`);
+  const f=c.querySelector(".feedback"), out=c.querySelector(".claim-out"); container.appendChild(c);
+  const st=()=>api.state.answers[t.id+"Best"]||{best:0,names:[]};
+  const showBest=()=>{ const b=st(); if(b.best) out.innerHTML=`<p class="hint">Most claims you have found in one spot: <b>${b.best}</b>${b.names.length?" ("+b.names.map(esc).join("; ")+")":""}.</p>`; };
+  showBest();
+  if(api.taskDone(t.id)){ api.fb(f,true,`Done. You found a place where ${st().best} territories overlap.`); return; }
+  if(mapGone(api,["territories"])) return skip(api,t,f);
+  if(!api.map.ready){ api.fb(f,null,"Waiting for the map to load…"); return; }
+  api.banner(t.banner);
+  api.map.clickHandler=async(ev)=>{
+    const L=api.map.layers.territories; if(!L||!L.queryFeatures) return skip(api,t,f);
+    let names=[];
+    try{ const r=await L.queryFeatures({geometry:ev.mapPoint,spatialRelationship:"intersects",outFields:["Name"],returnGeometry:false});
+         names=[...new Set(r.features.map(g=>g.attributes.Name).filter(Boolean))]; }
+    catch(e){ api.fb(f,false,"Could not read the territories there. Try another spot."); return; }
+    pin(api,ev.mapPoint,names.length,names.length>=t.goal?"#2F7D4F":"#3D3D3D");
+    const b=st(); if(names.length>b.best){ api.state.answers[t.id+"Best"]={best:names.length,names}; api.save(); }
+    showBest();
+    if(names.length>=t.goal){
+      api.state.answers[t.id]=`${names.length} territories overlap here: ${names.join("; ")}`;
+      api.markTask(t.id,t.points,"points"); api.banner(""); api.map.clickHandler=null;
+      api.fb(f,true,`Found it: <b>${names.length}</b> territories overlap here (${names.map(esc).join("; ")}). The popup shows the same count as "1 of ${names.length}".`);
+    } else api.fb(f,false,names.length?`${names.length} ${names.length===1?"territory":"territories"} here. Keep looking for ${t.goal} or more. Hint: try the middle of the continent, in the Ohio Valley or Oklahoma.`:"No territory here. Click on a coloured area.");
+  };
+}
+
+// 3. Region tour with the five lesson bookmarks (lesson step 6)
+let tourVisit=null;
+function regionTour(container,api,t){
+  const visited=()=>api.state.answers[t.id+"Visited"]||{};
+  const c=card(api,t,`<ul class="steps"></ul><div class="row" style="flex-wrap:wrap;gap:6px"></div>`);
+  const f=c.querySelector(".feedback"), ul=c.querySelector(".steps"), row=c.querySelector(".row"); container.appendChild(c);
+  function draw(){ const v=visited(); ul.innerHTML=REGIONS.map(r=>`<li class="${v[r]?"done":"active"}">${esc(r)}${v[r]?" — visited":""}</li>`).join(""); }
+  function visit(name){
+    if(!REGIONS.includes(name)) return; const v=Object.assign({},visited()); v[name]=true;
+    api.state.answers[t.id+"Visited"]=v; api.save(); draw();
+    if(REGIONS.every(r=>v[r])&&!api.taskDone(t.id)){ api.state.answers[t.id]="Visited "+REGIONS.join(", "); api.markTask(t.id,t.points,"points"); api.fb(f,true,"Done. You toured all five regions."); }
+  }
+  REGIONS.forEach(r=>{ const b=api.h(`<button class="secondary" type="button">${esc(r)}</button>`); b.addEventListener("click",()=>{ api.goBookmark(r); visit(r); }); row.appendChild(b); });
+  draw(); tourVisit=visit; onDetach(c,()=>{ if(tourVisit===visit) tourVisit=null; });
+  if(api.taskDone(t.id)) api.fb(f,true,"Done. You toured all five regions.");
+  else if(api.map.failed) skip(api,t,f,"The map is not available, so this task is skipped.");
+}
+
+// 4. Transparency slider (lesson steps 7 and 12)
+function transparency(container,api,t){
+  const c=card(api,t,`<label for="tr_${t.id}"><b>Transparency of Indigenous Territories:</b> <span class="tv">0%</span></label>
+    <input type="range" id="tr_${t.id}" min="0" max="95" step="5" value="0" style="width:100%">`);
+  const f=c.querySelector(".feedback"), r=c.querySelector("input"), tv=c.querySelector(".tv"); container.appendChild(c);
+  const L=()=>api.map.layers.territories;
+  const cur=L()&&L().opacity!=null?Math.round((1-L().opacity)*100):0; r.value=cur; tv.textContent=cur+"%";
+  if(api.taskDone(t.id)) api.fb(f,true,"Done. Leave the slider wherever it helps you see the basemap.");
+  if(mapGone(api,["territories"])){ r.disabled=true; return skip(api,t,f); }
+  r.addEventListener("input",()=>{
+    const v=+r.value; tv.textContent=v+"%"; if(L()) L().opacity=1-v/100;
+    if(v>=t.goal&&!api.taskDone(t.id)){ api.state.answers[t.id]=`Set transparency to ${v}%`; api.markTask(t.id,t.points,"points"); api.fb(f,true,"Now the mountains, rivers and coastlines on the basemap show through the territories."); }
+  });
+}
+
+// 5. Swipe: Biomes on one side, Indigenous Territories on the other (lesson step 9)
+let swipe=null;
+function endSwipe(api){ if(swipe){ try{ api.map.view.ui.remove(swipe); swipe.destroy(); }catch(e){} swipe=null; } }
+function swipeTask(container,api,t){
+  const c=card(api,t,`<div class="row"><button class="primary" type="button" data-on>Start Swipe</button><button class="secondary" type="button" data-off>Stop Swipe</button></div>`);
+  const f=c.querySelector(".feedback"), on=c.querySelector("[data-on]"), off=c.querySelector("[data-off]"); container.appendChild(c);
+  onDetach(c,()=>endSwipe(api));
+  if(api.taskDone(t.id)) api.fb(f,true,"Done. You can keep swiping to compare.");
+  if(mapGone(api,["territories","biomes"])){ on.disabled=off.disabled=true; return skip(api,t,f); }
+  on.addEventListener("click",()=>{
+    if(!api.map.ready){ api.fb(f,null,"Waiting for the map to load…"); return; }
+    if(swipe) return; api.setLayer("biomes",true); api.setLayer("territories",true);
+    require(["esri/widgets/Swipe","esri/core/reactiveUtils"],(Swipe,ru)=>{
+      endSwipe(api);
+      swipe=new Swipe({view:api.map.view,leadingLayers:[api.map.layers.biomes],trailingLayers:[api.map.layers.territories],position:50});
+      api.map.view.ui.add(swipe);
+      api.fb(f,null,"Drag the handle across the map. Biomes show on the left, Indigenous Territories on the right.");
+      ru.watch(()=>swipe&&swipe.position,(p)=>{
+        if(p==null||api.taskDone(t.id)||Math.abs(p-50)<15) return;
+        api.state.answers[t.id]="Used Swipe to compare Biomes and Indigenous Territories"; api.markTask(t.id,t.points,"points");
+        api.fb(f,true,"Nice. Compare where small, crowded territories sit with the biome colours under them.");
+      });
+    },()=>api.fb(f,false,"The Swipe tool could not load. Turn Biomes on and off in the Layers list instead."));
+  });
+  off.addEventListener("click",()=>endSwipe(api));
+}
+
+// 6. Biome probe: click three different biomes, read the biome and count the territories there (lesson step 10)
+function biomeProbe(container,api,t){
+  const c=card(api,t,`<table class="probe" style="width:100%;font-size:.9rem;border-collapse:collapse"><thead><tr><th style="text-align:left">Biome</th><th style="text-align:right">Territories here</th></tr></thead><tbody></tbody></table>`);
+  const f=c.querySelector(".feedback"), tb=c.querySelector("tbody"); container.appendChild(c);
+  const log=()=>api.state.answers[t.id+"Log"]||[];
+  const draw=()=>{ tb.innerHTML=log().map(x=>`<tr><td>${esc(x.biome)}${x.eco?` <span class="hint">(${esc(x.eco)})</span>`:""}</td><td style="text-align:right"><b>${x.n}</b></td></tr>`).join("")||`<tr><td colspan="2" class="hint">Click the map to start.</td></tr>`; };
+  draw();
+  if(api.taskDone(t.id)){ api.fb(f,true,"Done. Compare your numbers: which biomes hold the most territories?"); return; }
+  if(mapGone(api,["territories","biomes"])) return skip(api,t,f);
+  if(!api.map.ready){ api.fb(f,null,"Waiting for the map to load…"); return; }
+  api.banner(t.banner);
+  api.map.clickHandler=async(ev)=>{
+    const B=api.map.layers.biomes, T=api.map.layers.territories; if(!B||!T||!B.queryFeatures) return skip(api,t,f);
+    try{
+      const [b,n]=await Promise.all([
+        B.queryFeatures({geometry:ev.mapPoint,spatialRelationship:"intersects",outFields:["BIOME_NAME","ECO_NAME"],returnGeometry:false}),
+        T.queryFeatureCount({geometry:ev.mapPoint,spatialRelationship:"intersects"})]);
+      const a=b.features[0]&&b.features[0].attributes; if(!a){ api.fb(f,false,"No biome there (open water?). Click on land."); return; }
+      const entry={biome:a.BIOME_NAME,eco:a.ECO_NAME,n};
+      const L=log().concat([entry]); api.state.answers[t.id+"Log"]=L; api.save(); draw(); pin(api,ev.mapPoint,n);
+      const kinds=new Set(L.map(x=>x.biome));
+      if(kinds.size>=t.goal){
+        api.state.answers[t.id]=L.map(x=>`${x.biome}: ${x.n}`).join(" | "); api.markTask(t.id,t.points,"points"); api.banner(""); api.map.clickHandler=null;
+        api.fb(f,true,`You sampled ${kinds.size} different biomes. Which ones held the most territories?`);
+      } else api.fb(f,null,`${a.BIOME_NAME}: ${n} ${n===1?"territory":"territories"}. ${t.goal-kinds.size} more different ${t.goal-kinds.size===1?"biome":"biomes"} to go.`);
+    }catch(e){ api.fb(f,false,"Could not read that spot. Try again."); }
+  };
+}
+
+/* ---------------------------------------------------------------------
+   LAYERS — order = Layers panel = Legend = draw order (first on top)
+   --------------------------------------------------------------------- */
+const LAYERS=[
+  {key:"rivers",title:"Major Rivers",visible:true,url:RIVERS_URL,definitionExpression:"scalerank IN (5,4,3,2,1)",
+   renderer:{type:"simple",symbol:{type:"simple-line",color:"#2265C9",width:2.5}},color:"#2265C9",size:2.5,nameField:"name",
+   legend:[{label:"Major river",color:"#2265C9",shape:"line"}],
+   popup:{title:"{name}",content:(a)=>`Major river${a.featurecla&&a.featurecla!=="River"?" ("+esc(a.featurecla)+")":""}. Natural Earth rank ${esc(a.scalerank||"")} (1 = largest).`},
+   sourceNote:"Natural Earth 1:10m rivers and lake centerlines, filtered to the largest rivers (scalerank 1–5) as in the lesson's web map. The built-in substitute is a simplified sketch of 11 major rivers.",
+   features:RIVERS.map(r=>({path:r.p,color:"#2265C9",attrs:{name:r.n,featurecla:"River (generalized)"}}))},
+  {key:"territories",title:"Indigenous Territories of North America",visible:true,url:TERR_URL,nameField:"Name",
+   legendTitle:"Indigenous Territories",
+   legend:[{label:"One People's territory (each its own colour)",color:"#93A87A",shape:"square"},
+           {label:"Overlap: colours blend",color:"#6E6A86",shape:"square"}],
+   popup:{title:"{Name}",content:(a)=>`This is the territory of the <b>${esc(a.Name)}</b> peoples.${a.description?` To learn more about this community and the sources used to draw this shape, or to suggest a correction, visit the <a href="${esc(a.description)}" target="_blank" rel="noopener">${esc(a.Name)} page on Native Land Digital</a>.`:""}<p class="hint" style="margin-top:6px"><i>Disclaimer: this map does not represent or intend to represent official or legal boundaries of any Indigenous Nation.</i></p>`},
+   sourceNote:"Native Land Digital territories (898 shapes), from the lesson's web map; drawn with the service's own colours. There is no built-in substitute for this layer."},
+  {key:"biomes",title:"Biomes",visible:false,url:BIOMES_URL,opacity:.6,legend:BIOME_LEGEND,
+   popup:{title:"{BIOME_NAME}",content:(a)=>`Ecoregion: <b>${esc(a.ECO_NAME)}</b><br>Realm: ${esc(a.REALM||"")}`},
+   sourceNote:"RESOLVE Ecoregions and Biomes 2017 (Esri Living Atlas), from the lesson's web map; drawn with the service's own biome colours at 60% opacity."}
+];
+
+/* ---------------------------------------------------------------------
+   SECTIONS — the lesson's 12 steps and 7 questions in five phases
+   --------------------------------------------------------------------- */
+const SECTIONS=[
+ {id:"ask",title:"Ask",question:"Where are the territories of Indigenous Peoples in North America?",layers:["territories","rivers"],bookmark:"North America",tasks:[
+   {type:"callout",html:"This map shows land claimed as the territory of different Indigenous Peoples. <b>Each colour is one Indigenous community</b> that has lived on that land, including lands that Peoples were forced to move to after European settlers arrived. Some claims come from large Nations, others from smaller, specific groups. Many claims overlap, which creates the kaleidoscope effect."},
+   {type:"html",html:"<p class=\"hint\">The <b>Layers</b> list (top right) shows every layer available. The <b>Legend</b> (bottom left) explains the colours.</p>"},
+   {type:"custom",id:"askInfo",points:5,title:"Read the layer description",text:"Before you read a map, find out where its data comes from.",render:layerInfo},
+   {type:"mcq",id:"askLegend",points:5,question:"Check the legend. What does each colour on the Indigenous Territories layer stand for?",
+    choices:["The territory of one Indigenous People or community","A U.S. state or Canadian province","A modern reservation or reserve","A language family"],
+    correct:0,explain:"Each shape is one People's territory. Where shapes overlap, colours blend — more than one People lived on, shared or claimed that land."},
+   {type:"custom",id:"askCounter",points:15,goal:4,title:"Map task: claim counter",
+    text:"Click anywhere on the map. A popup opens (the counter, such as \"1 of 5\", shows how many territories are there), and a pin shows the same count. Find a spot where <b>at least 4</b> territories overlap.",
+    banner:"<b>Map task:</b> click the map to count overlapping territories. Find 4 or more.",render:claimCounter},
+   {type:"mcq",id:"askQ1",points:10,question:"<b>Question 1.</b> What do you notice about the individual territories? Are they spread evenly across the continent or clustered in certain areas?",
+    choices:["Spread evenly: every territory is about the same size","Clustered: small territories crowd the Pacific coast and the East, while much larger territories cover the Great Plains, the deserts and the far north","Clustered only in Canada; the United States has few territories","Found only along the Mississippi River"],
+    correct:1,explain:"The pattern is uneven. In a 4° × 4° square there are about 74 territories on the Pacific Northwest coast and 36 in central California, but only 8 in Nevada's Great Basin and 7 in the boreal forest of northern Canada. Overlap varies too: one spot near Oklahoma City sits inside 5 territories, one in central Nevada inside just 1."}
+ ]},
+ {id:"acquire",title:"Acquire",question:"Which regions have claims from the most Indigenous Peoples?",layers:["territories","rivers"],bookmark:"North America",
+  intro:"<p>The lesson's bookmarks divide the United States into five regions. Visit each one and compare how many different territories you see.</p>",tasks:[
+   {type:"custom",id:"acqTour",points:10,title:"Map task: tour the regions",text:"Use these buttons or the <b>Bookmarks</b> panel to visit all five regions.",render:regionTour},
+   {type:"detective",id:"acqDetective",title:"Homeland detective",deck:[
+      {n:"Chumash",lang:"wc",why:"Coast and Channel Islands around Santa Barbara, California."},
+      {n:"Diné (Navajo)",lang:"w",why:"The Four Corners: Arizona, New Mexico and Utah."},
+      {n:"Muscogee (Creek)",lang:"s",why:"Georgia and Alabama, before removal to Indian Territory (Oklahoma)."},
+      {n:"Wampanoag",lang:"ne",why:"Southeastern Massachusetts and Rhode Island; the People who met the Pilgrims in 1620."},
+      {n:"Shawnee",lang:"e",why:"The Ohio River valley."},
+      {n:"Duwamish",lang:"wc",why:"Around Seattle and Puget Sound, Washington."},
+      {n:"Hopi",lang:"w",why:"Mesas of northeastern Arizona."},
+      {n:"Choctaw",lang:"s",why:"Mississippi and Alabama, before removal to Indian Territory (Oklahoma)."},
+      {n:"Penobscot",lang:"ne",why:"The Penobscot River valley in Maine."},
+      {n:"Tongva",lang:"wc",why:"The Los Angeles Basin, California."}
+    ],langs:["wc","w","s","e","ne"],intro:"In which region is each People's homeland? Use the bookmarks and click territories to check."},
+   {type:"mcq",id:"acqQ2",points:10,question:"<b>Question 2.</b> Which regions seem to have claims from the highest number of different Indigenous Peoples?",
+    choices:["The West (Rocky Mountains and Great Basin)","The South","The West Coast, followed by the East","The Northeast"],
+    correct:2,explain:"The West Coast bookmark area holds about 242 territories, even though the West bookmark area is more than twice as large and holds about 92. The East comes next (about 129). The South has about 117 spread over a much larger area, and the Northeast about 91."}
+ ]},
+ {id:"explore",title:"Explore",question:"What physical features do the crowded regions have in common?",layers:["territories","rivers"],bookmark:"West Coast",
+  intro:"<p>The map is at the <b>West Coast</b> bookmark. Make the territories see-through so you can read the land underneath.</p>",tasks:[
+   {type:"custom",id:"expTransparency",points:10,goal:50,title:"Map task: adjust transparency",text:"Drag the slider to at least <b>50%</b> so the mountains, valleys, rivers and coastline on the basemap show through.",render:transparency},
+   {type:"click",id:"expRiver",points:10,title:"Map task: click a river",text:"Click a blue river line inside a crowded area (zoom in if the line is hard to hit).",layer:"rivers",
+    success:c=>`<b>${esc(c.name)}</b>. Notice how many territories line up along it.`,banner:"<b>Map task:</b> click a blue river line."},
+   {type:"multi",id:"expQ3",points:15,question:"<b>Question 3.</b> What physical features do the regions with many overlapping groups have in common? Select all that apply.",
+    choices:["Ocean coastlines with bays, sounds and inlets","Large rivers and river valleys","Fertile lowlands with a mild, wet climate","Large, dry deserts","Ice fields and tundra","High, bare mountain peaks"],
+    correct:[0,1,2],explain:"On the West Coast, territories crowd Puget Sound, the Columbia River, San Francisco Bay and California's Central Valley. In the East they follow the Ohio and Mississippi valleys and the Atlantic coast. Deserts, tundra and high peaks hold fewer, larger territories."},
+   {type:"button",id:"expEast",points:5,label:"Go to the East bookmark",bookmark:"East",callout:"<b>Compare:</b> jump to the <b>East</b> bookmark and look for the same features."},
+   {type:"mcq",id:"expWhy",points:10,question:"Why could many small territories fit along the Pacific coast?",
+    choices:["Rich food close at hand — salmon, shellfish, acorns and game — meant communities did not need to travel far","The coast had no mountains, so travel was easy","Governments drew small boundaries there","The coast was empty, so there was plenty of room"],
+    correct:0,explain:"Where food is plentiful and reliable in a small area, many communities can live close together. Where food is scattered (deserts, the far north) or moves (bison on the plains), territories are much larger."}
+ ]},
+ {id:"analyze",title:"Analyze",question:"Which biomes supported more Indigenous Peoples, and how do land features explain the pattern?",layers:["territories","rivers"],bookmark:"North America",
+  intro:"<p>Indigenous Peoples adapted to their environments in many ways. In hot, dry areas, some built shelters in cool mountain caves. On the plains, many moved often to follow bison herds. Compare where Peoples lived with the <b>biomes</b> of their lands.</p>",tasks:[
+   {type:"button",id:"anaBiomes",points:5,label:"Turn on Biomes",layersOn:["biomes"],callout:"<b>Step 1:</b> turn on the <b>Biomes</b> layer and look at the legend."},
+   {type:"custom",id:"anaSwipe",points:10,title:"Map task: swipe",text:"Start the Swipe tool, then drag its handle to compare the Biomes layer (left) with the Indigenous Territories layer (right).",render:swipeTask},
+   {type:"custom",id:"anaProbe",points:15,goal:3,title:"Map task: biome probe",text:"Click the map in <b>three different biomes</b>. For each spot you will see the biome and how many territories are there.",banner:"<b>Map task:</b> click three different biomes.",render:biomeProbe},
+   {type:"order",id:"anaRank",points:15,title:"Rank the squares",hint:"Each place is a 4° × 4° square. Put them in order from the <b>most</b> territories to the <b>fewest</b>, then check.",items:[
+      {t:"Pacific Northwest coast (temperate conifer forest)",d:"about 74 territories"},
+      {t:"Central California (Mediterranean woodland and Sierra forests)",d:"about 36"},
+      {t:"Ohio Valley (temperate broadleaf forest)",d:"about 15"},
+      {t:"Great Basin, Nevada (desert and xeric shrubland)",d:"about 8"}]},
+   {type:"mcq",id:"anaQ4",points:10,question:"<b>Question 4.</b> Which biomes appear to have supported more Indigenous Peoples? Fewer?",
+    choices:["More: deserts and tundra. Fewer: forests along the coasts","More: temperate conifer forests and Mediterranean woodlands of the Pacific coast, and temperate broadleaf forests of the East. Fewer: deserts, boreal forest (taiga) and tundra","About the same in every biome","More: boreal forest. Fewer: Mediterranean woodlands"],
+    correct:1,explain:"Mild, well-watered forests and woodlands with plentiful food supported many communities in small territories. Dry deserts and the cold boreal forest and tundra supported fewer people spread across very large territories."},
+   {type:"button",id:"anaBiomesOff",points:5,label:"Turn off Biomes",layersOff:["biomes"],callout:"<b>Step 2:</b> turn off <b>Biomes</b>. Use the transparency slider from the Explore section again if it helps you see the land."},
+   {type:"mcq",id:"anaQ5",points:10,question:"<b>Question 5.</b> How do land features (rivers, coasts, mountains and plains) help explain where Indigenous Peoples lived?",
+    choices:["They don't: territories ignore the land","Rivers and coasts gave water, food and travel routes, so territories cluster along them; mountain ranges often formed edges between territories; on the open plains, Peoples followed bison across large territories","Peoples avoided rivers because of flooding","Peoples lived mainly on mountaintops for defence"],
+    correct:1,explain:"Look at the Columbia River or Puget Sound: territories line the water. Ranges such as the Cascades and Sierra Nevada separate coastal Peoples from those of the interior, while the Great Plains hold big, overlapping territories of mobile bison hunters."}
+ ]},
+ {id:"act",title:"Act",question:"How did the geography of Indigenous Peoples shape cooperation, conflict and the United States?",layers:["territories","rivers"],bookmark:"North America",tasks:[
+   {type:"multi",id:"actQ6",points:15,question:"<b>Question 6.</b> Based on the locations of Indigenous Peoples, where might cooperation or conflict have happened between groups? Select every map feature that helps you predict it.",
+    choices:["Places where many territories overlap, because several Peoples used or claimed the same land","Major rivers, which were routes for travel and trade","Edges where two biomes meet, because Peoples traded what each environment produced","Places with no territories at all","High mountain peaks far from water"],
+    correct:[0,1,2],explain:"Overlaps mark shared or contested land, such as the hunting grounds of the Ohio Valley. Rivers linked Peoples: Celilo Falls on the Columbia was a huge fishing and trading place. Biome edges brought different economies together: at Pecos Pueblo, farming Pueblo peoples traded with bison-hunting Plains peoples."},
+   {type:"click",id:"actColumbia",points:10,title:"Map task: find the Columbia River",text:"Zoom to the Pacific Northwest and click the Columbia River, the border between Washington and Oregon.",layer:"rivers",
+    test:c=>/columbia/i.test(c.name),success:()=>"<b>Columbia River.</b> Celilo Falls, east of The Dalles, was one of the great fishing and trading places of North America, where coastal and interior Peoples met for thousands of years. The falls were flooded by The Dalles Dam in 1957.",
+    fail:c=>`That is the ${esc(c.name)}. The Columbia forms most of the Washington–Oregon border.`,banner:"<b>Map task:</b> click the Columbia River."},
+   {type:"button",id:"actOklahoma",points:5,label:"Go to Oklahoma",bookmark:"Oklahoma",callout:"<b>Look closely:</b> jump to <b>Oklahoma</b> and click a few spots. Count the overlapping territories in the popups."},
+   {type:"mcq",id:"actRemoval",points:10,question:"Why do so many territories overlap in present-day Oklahoma?",
+    choices:["After the Indian Removal Act of 1830, the U.S. government forced many Nations from the East onto \"Indian Territory\", on top of Peoples already living there","Oklahoma had the best farmland on the continent","Every People chose to move there for trade","Mapmakers made a mistake"],
+    correct:0,explain:"One spot near Oklahoma City falls inside 5 territories: the Wichita, Osage, Comanche and Kiowa, plus the Kickapoo, whose earlier homelands were around the Great Lakes. Removal from the Southeast (Cherokee, Muscogee, Choctaw, Chickasaw, Seminole) added still more."},
+   {type:"free",id:"actQ7",points:25,title:"<b>Question 7.</b> How might the geography of Indigenous Peoples have influenced the development of the United States?",minWords:60,buttonLabel:"Log response",
+    text:"Use evidence from the map. Ideas to consider: where European settlers and later cities located (rivers, coasts, valleys), trails and trade routes, farming, place names, treaties and removal, and today's Nations. There is no single right answer; points are for a complete, evidence-based response.",
+    label:"Write your response with at least two examples from the map",placeholder:"The geography of Indigenous Peoples influenced the United States because ..."}
+ ]}
+];
+
+/* ---------------------------------------------------------------------
+   ACTIVITY
+   --------------------------------------------------------------------- */
+window.ACTIVITY={
+  slug:"indigenous-north-america",
+  title:"Indigenous North America",
+  subtitle:"Based on the National Geographic MapMaker lesson · Indigenous territories, biomes and land",
+  storageKey:"indigenousNorthAmericaState",
+  theme:{"--header":"#6B6B6B","--header-rule":"#FFD800","--accent":"#3D3D3D","--accent-hover":"#5A5A5A","--callout":"#F1F0EA"},
+  map:{basemap:"terrain",center:[-98,40],zoom:4,minZoom:2,maxZoom:12,measure:false},
+  bookmarks:BOOKMARKS,
+  palette:{
+    wc:{label:"West Coast",color:"#1F6E8C"},w:{label:"West",color:"#B5651D"},s:{label:"South",color:"#8C2F39"},
+    e:{label:"East",color:"#2F7D4F"},ne:{label:"Northeast",color:"#5B4B8A"}
+  },
+  layers:LAYERS,
+  badges:[{name:"Map Reader"},{name:"Wayfinder"},{name:"River Reader"},{name:"Biome Scout"},{name:"Storyteller"}],
+  sections:SECTIONS,
+  onMapReady:()=>{ const sel=document.getElementById("bookmarks"); if(sel) sel.addEventListener("change",()=>{ const b=BOOKMARKS[+sel.value]; if(b&&tourVisit) tourVisit(b.name); }); },
+  onExplore:(api)=>endSwipe(api),
+  summary:(state)=>{ const b=state.answers.askCounterBest; return [["Most overlapping claims found",b?b.best+" territories":"—"],["Homeland detective",((state.answers.acqDetective||{}).earned||0)+" points"]]; },
+  help:`<h2>How to play</h2>
+  <p>You work through five sections in order: Ask, Acquire, Explore, Analyze and Act. They follow the steps and seven questions of the National Geographic MapMaker lesson. Each section unlocks the next once every task is done. Earn points for correct answers (three in a row adds a streak bonus) and a badge for each section.</p>
+  <h3>Map tools</h3>
+  <ul>
+    <li><b>Layers</b> (top right) turns layers on and off. <b>Legend</b> (bottom left) explains the colours. <b>Bookmarks</b> jump to the lesson's regions: West Coast, West, South, East and Northeast.</li>
+    <li>Click the map to open a <b>popup</b>. Where territories overlap, the popup says "1 of 5" and so on; use its arrows to step through every territory at that spot.</li>
+    <li>The <b>transparency</b> slider (Explore section) lets the basemap show through the territories. The <b>Swipe</b> tool (Analyze section) puts Biomes on one side of a handle and Indigenous Territories on the other.</li>
+    <li>Explore mode (header, top right) hides the GeoInquiry panel and turns on every layer.</li>
+    <li>Your progress saves in this browser. Use Reset to start over.</li>
+  </ul>`,
+  sources:`<h2>Sources and data</h2>
+  <h3>Map layers</h3>
+  {{LAYER_TABLE}}
+  <h3>References</h3>
+  <ul>
+    <li>National Geographic Society and Esri, "Indigenous North America" (National Geographic MapMaker lesson), CC BY-NC-SA 4.0. Original map: <a href="https://education.maps.arcgis.com/home/item.html?id=a19c24b3a1d9446fa4329d4477cded1c" target="_blank" rel="noopener">ArcGIS Online item a19c24b3…</a>.</li>
+    <li><a href="https://native-land.ca" target="_blank" rel="noopener">Native Land Digital</a>, territories map and data. Not official or legal boundaries.</li>
+    <li>Dinerstein, E. et al. (2017). An ecoregion-based approach to protecting half the terrestrial realm. <i>BioScience</i> 67(6): 534–545 (RESOLVE Ecoregions and Biomes 2017).</li>
+    <li><a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a>, 1:10m rivers and lake centerlines.</li>
+    <li>Territory counts in the answer keys come from spatial queries of the Native Land layer (October 2026) using the bookmark extents and 4° × 4° squares named in each question.</li>
+  </ul>`,
+  teacher:`<p>A five-phase GeoInquiry built from the National Geographic MapMaker lesson "Indigenous North America". Students explore the territories of Indigenous Peoples, compare regions, relate settlement patterns to physical features and biomes, and reason about cooperation, conflict and the development of the United States. Time: about 30–40 minutes.</p>
+  <p><b>Suggested alignment</b> (National Geography Standards): Standard 4 (physical and human characteristics of places), Standard 12 (patterns of human settlement), Standard 13 (cooperation and conflict) and Standard 15 (how physical systems affect human systems).</p>
+  <h3>How the lesson maps onto the five sections</h3>
+  <ul>
+    <li><b>Ask:</b> steps 1–5 (layers, layer description, legend, popups) and Question 1.</li>
+    <li><b>Acquire:</b> step 6 (the five region bookmarks) and Question 2.</li>
+    <li><b>Explore:</b> step 7 (transparency) and Question 3.</li>
+    <li><b>Analyze:</b> steps 8–12 (Biomes, Swipe, popups, transparency) and Questions 4–5.</li>
+    <li><b>Act:</b> Questions 6–7, with Question 7 as the written response students download and turn in.</li>
+  </ul>
+  <h3>Things to know</h3>
+  <ul>
+    <li>The lesson's questions are open-ended. In this app Questions 1–6 are multiple choice with answer keys grounded in the map data (territory counts per bookmark and per 4° square, checked October 2026); Question 7 stays a written response. Consider discussing Questions 1–6 aloud before students answer.</li>
+    <li>All three layers load live from the lesson's web map: Native Land Digital territories, Natural Earth major rivers, and RESOLVE Biomes. If the river service is down, a simplified built-in river layer appears; the territories and biomes have no substitute, and their map tasks are skipped.</li>
+    <li>Territories are community-sourced and are <i>not</i> official or legal boundaries; overlaps reflect shared, used or contested land and later removals. Encourage students to follow the popup links to Native Land Digital and to learn the current names Peoples use for themselves.</li>
+    <li>The map needs access to js.arcgis.com and arcgis.com. If your school filters those, the questions still run but map tasks are skipped.</li>
+    <li>Explore mode turns on every layer for open exploration or a projector walkthrough.</li>
+  </ul>
+  <h3>Then try this</h3>
+  <ul>
+    <li>Have students find the territory where your school stands and look up that People on Native Land Digital.</li>
+    <li>Compare the Oklahoma overlaps with a map of the Trail of Tears and other removal routes.</li>
+    <li>Ask students to choose one People from the Homeland detective and research how their environment shaped food, housing and travel.</li>
+  </ul>`
+};
+})();
+
+</script>
+<script>
+/* =====================================================================
+   GeoInquiries Lab — activity engine
+   Derived from "A Nation Divided: Civil War Map Missions" (final state).
+   Reads the global ACTIVITY object (see README.md for the schema) and
+   renders the header, five-section GeoInquiry rail, scoring/badges,
+   ArcGIS map with Layers/Legend panels, bookmarks, modes and modals.
+   ===================================================================== */
+(function(){
+"use strict";
+const A = window.ACTIVITY || {};
+if(!A.sections || !A.sections.length) throw new Error("ACTIVITY.sections is required");
+
+/* ---------- helpers ---------- */
+const $ = (id)=>document.getElementById(id);
+const esc = (s)=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function h(html){ const t=document.createElement("template"); t.innerHTML=html.trim(); return t.content.firstElementChild; }
+function fb(el,ok,text){ el.hidden=false; el.className="feedback "+(ok===null?"":(ok?"good":"bad")); el.innerHTML=text; }
+const hex2rgba=(hx,a)=>{ if(Array.isArray(hx)) return hx.length===4?hx:[...hx,a]; const n=parseInt(hx.slice(1),16); return [(n>>16)&255,(n>>8)&255,n&255,a]; };
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a.every((v,i)=>v===i)&&a.length>1?shuffle(a):a; }
+
+/* ---------- palette (language / colonial power / generic categories) ---------- */
+const PALETTE = Object.assign({
+  fr:{label:"French",color:"#3B5BA9"},
+  en:{label:"English",color:"#B33A3A"},
+  es:{label:"Spanish",color:"#D98A1F"},
+  nl:{label:"Dutch",color:"#E4641E"},
+  sv:{label:"Swedish",color:"#3E8FB0"},
+  pt:{label:"Portuguese",color:"#2F8F6B"},
+  dk:{label:"Danish",color:"#7A6A54"},
+  ru:{label:"Russian",color:"#5A7D2A"},
+  am:{label:"Amerindian (Indigenous)",color:"#7A4FA3"},
+  sa:{label:"South Asian (Hindi/Urdu)",color:"#A0286F"},
+  other:{label:"Other",color:"#6E6E6E"},
+  c1:{label:"Category 1",color:"#2E5E9E"},c2:{label:"Category 2",color:"#9C7A4A"},c3:{label:"Category 3",color:"#C9A227"},
+  c4:{label:"Category 4",color:"#2F7D4F"},c5:{label:"Category 5",color:"#A83A2A"},c6:{label:"Category 6",color:"#7A4FA3"},
+  c7:{label:"Category 7",color:"#3E8FB0"},c8:{label:"Category 8",color:"#E4641E"}
+}, A.palette||{});
+function classify(v){
+  if(typeof A.classify==="function"){ const k=A.classify(v); if(k&&PALETTE[k]) return k; }
+  const s=String(v==null?"":v).trim().toLowerCase();
+  for(const k of Object.keys(PALETTE)){ if(k===s||PALETTE[k].label.toLowerCase()===s) return k; }
+  if(/french|france/.test(s)) return "fr";
+  if(/english|england|brit|great britain|\buk\b/.test(s)) return "en";
+  if(/spanish|spain|castil/.test(s)) return "es";
+  if(/dutch|netherland|holland/.test(s)) return "nl";
+  if(/swed/.test(s)) return "sv";
+  if(/portug|brazil/.test(s)) return "pt";
+  if(/dan(ish|mark)/.test(s)) return "dk";
+  if(/russia/.test(s)) return "ru";
+  if(/native|amerind|indigenous|indian|arawak|carib|taino|taíno|aztec|nahuatl|maya|inca|first nation/.test(s)) return "am";
+  if(/hindi|urdu|south asian|east indian/.test(s)) return "sa";
+  // stable generic category by hash
+  let x=0; for(const ch of s) x=(x*31+ch.charCodeAt(0))>>>0; return "c"+(1+(x%8));
+}
+const colorOf=(k)=>(PALETTE[k]||PALETTE.other).color;
+const labelOf=(k)=>(PALETTE[k]||PALETTE.other).label;
+
+/* ---------- branding, theme, header ---------- */
+document.title=A.title||document.title;
+$("appTitle").firstChild.textContent=A.title||"";
+$("appSubtitle").textContent=A.subtitle||"";
+if(A.theme) Object.entries(A.theme).forEach(([k,v])=>document.documentElement.style.setProperty(k,v));
+if(A.logo){ if(A.logo.src) $("logoImg").src=A.logo.src; if(A.logo.alt) $("logoImg").alt=A.logo.alt; if(A.logo.href) $("logoLink").href=A.logo.href; }
+
+/* ---------- sections, badges, state ---------- */
+const SECTIONS=A.sections;
+const ORDER=SECTIONS.map(s=>s.id);
+const TITLES=Object.fromEntries(SECTIONS.map(s=>[s.id,s.title]));
+const DEFAULT_BADGE_NAMES=["Cartographer","Surveyor","Scout","Strategist","Historian"];
+const BADGES=SECTIONS.map((s,i)=>Object.assign({id:s.id,letter:String(i+1),name:(A.badges&&A.badges[i]&&A.badges[i].name)||DEFAULT_BADGE_NAMES[i]||("Badge "+(i+1)),section:s.title},(A.badges&&A.badges[i])||{}));
+const STORAGE=A.storageKey||("geoinquiry:"+(A.slug||A.title||"activity"));
+const fresh=()=>({score:0,badges:[],mission:ORDER[0],done:{},answers:{},tasks:{},streak:0});
+let state=load()||fresh();
+function load(){ try{ const s=localStorage.getItem(STORAGE); return s?JSON.parse(s):null; }catch(e){ return null; } }
+function save(){ try{ localStorage.setItem(STORAGE,JSON.stringify(state)); }catch(e){} }
+function award(points,label){ state.score+=points; save(); $("scoreVal").textContent=state.score; if(points>0) toast(`+${points} ${label||"points"}`); }
+function taskDone(id){ return !!state.tasks[id]; }
+function markTask(id,points,label){ if(state.tasks[id]) return false; state.tasks[id]=true; save(); award(points,label); updateFinishBlock(); renderProgress(); renderBadges(); return true; }
+function earnBadge(id){
+  if(state.badges.includes(id)) return;
+  state.badges.push(id); state.done[id]=true; save(); renderBadges(); renderProgress();
+  const b=BADGES.find(x=>x.id===id); toast(`Badge earned: ${b.name}`);
+}
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),2200); }
+function sectionTaskIds(secId){ const s=SECTIONS.find(x=>x.id===secId); return s.tasks.filter(t=>t.id&&t.required!==false&&!["callout","html"].includes(t.type)).map(t=>t.id); }
+function badgeStatus(b){
+  if(state.badges.includes(b.id)) return "complete";
+  const started=b.id===state.mission||sectionTaskIds(b.id).some(taskDone);
+  return started?"in progress":"not started";
+}
+function renderBadges(){
+  const el=$("badges"); el.innerHTML="";
+  BADGES.forEach(b=>{
+    const d=document.createElement("div");
+    d.className="badge"+(state.badges.includes(b.id)?" earned":"");
+    const tip=`${b.letter}: ${b.section} ${badgeStatus(b)}`;
+    d.innerHTML=`<span aria-hidden="true">${esc(b.letter)}</span><span class="visually-hidden">${esc(tip)}</span>`;
+    d.setAttribute("role","listitem"); d.setAttribute("title",tip);
+    el.appendChild(d);
+  });
+  $("scoreVal").textContent=state.score;
+}
+function renderProgress(){
+  const nav=$("progressNav"); nav.innerHTML=""; nav.style.gridTemplateColumns=`repeat(${ORDER.length},1fr)`;
+  ORDER.forEach((m,i)=>{
+    const b=document.createElement("button"); b.type="button";
+    const unlocked=i===0||state.done[ORDER[i-1]];
+    const status=state.done[m]?"completed":(m===state.mission?"current section":(unlocked?"not started":"locked"));
+    b.innerHTML=`<b>${i+1}</b>${esc(TITLES[m])}<span class="visually-hidden">, ${status}</span>`;
+    b.className=(m===state.mission?"current ":"")+(state.done[m]?"done":"");
+    if(m===state.mission) b.setAttribute("aria-current","step");
+    b.disabled=!unlocked;
+    b.addEventListener("click",()=>{ state.mission=m; save(); renderMission(); });
+    nav.appendChild(b);
+  });
+}
+
+/* ---------- map ---------- */
+const MAPCFG=Object.assign({basemap:"topo-vector",center:[-95,38],zoom:4,minZoom:2,maxZoom:14,measure:false},A.map||{});
+const LAYERS=(A.layers||[]).slice();
+if(A.notes&&A.notes.length&&!LAYERS.some(l=>l.key==="notes")) LAYERS.unshift({key:"notes",title:"Map notes",visible:true,legend:"notes"});
+const map={ready:false,failed:false,view:null,layers:{},cfg:{},fallback:{},unavailable:{},values:{},modules:null,clickHandler:null,onNoteOpen:null,openedNotes:{},measure:null};
+LAYERS.forEach(l=>map.cfg[l.key]=l);
+const BOOKMARKS=A.bookmarks||[];
+
+function status(msg,err){ const s=$("mapStatus"); s.textContent=msg||""; s.classList.toggle("err",!!err); }
+function refreshStatus(){
+  const subs=Object.keys(map.fallback).map(k=>map.cfg[k].title), un=Object.keys(map.unavailable).map(k=>map.cfg[k].title);
+  if(!map.ready) return;
+  if(un.length) status(`Map ready · unavailable: ${un.join(", ")}`,true);
+  else if(subs.length) status(`Map ready · built-in substitute for ${subs.join(", ")}`);
+  else status("Map ready");
+}
+function initMap(){
+  if(typeof require!=="function"){ mapFailed(); return; }
+  require([
+    "esri/Map","esri/views/MapView","esri/layers/GraphicsLayer","esri/layers/FeatureLayer","esri/Graphic",
+    "esri/geometry/Point","esri/geometry/Polygon","esri/geometry/Polyline","esri/geometry/Extent",
+    "esri/geometry/support/webMercatorUtils","esri/geometry/geometryEngine","esri/core/reactiveUtils","esri/widgets/DistanceMeasurement2D"
+  ], function(Map,MapView,GraphicsLayer,FeatureLayer,Graphic,Point,Polygon,Polyline,Extent,wmUtils,geometryEngine,reactiveUtils,DistanceMeasurement2D){
+    try{
+      map.modules={Graphic,Point,Polygon,Polyline,Extent,wmUtils,geometryEngine,DistanceMeasurement2D,FeatureLayer,GraphicsLayer};
+      const pt=(lon,lat)=>new Point({longitude:lon,latitude:lat});
+      const label=(lon,lat,text,color,size,yoff)=>new Graphic({geometry:pt(lon,lat),
+        symbol:{type:"text",color:color||"#1B2A3C",haloColor:"#fff",haloSize:2,text,yoffset:yoff==null?10:yoff,
+                font:{size:size||10,family:"Source Sans 3",weight:"bold"}}});
+      const marker=(style,color,size)=>style==="cross"||style==="x"
+        ?{type:"simple-marker",style,size:size||12,color,outline:{color,width:3}}
+        :{type:"simple-marker",style:style||"circle",size:size||10,color,outline:{color:"#fff",width:1.2}};
+      const fill=(color,a)=>({type:"simple-fill",color:hex2rgba(color,a==null?.4:a),outline:{color,width:1.2}});
+      const line=(color,w,style)=>({type:"simple-line",color,width:w||3,style:style||"solid"});
+
+      // Client-side layer from cfg.features (also used as a fallback for a failed service)
+      function graphicsFrom(cfg){
+        const g=new GraphicsLayer({title:cfg.title,visible:!!cfg.visible});
+        (cfg.features||[]).forEach(f=>{
+          const cls=f.cls||(cfg.classField&&f.attrs?classify(f.attrs[cfg.classField]):null);
+          const color=f.color||(cls?colorOf(cls):(cfg.color||"#6E6E6E"));
+          let geometry,symbol;
+          if(f.rings){ geometry=new Polygon({rings:f.rings}); symbol=fill(color,cfg.fillOpacity); }
+          else if(f.path){ geometry=new Polyline({paths:[f.path]}); symbol=line(color,cfg.size||4,cfg.lineStyle); }
+          else { geometry=pt(f.lon,f.lat); symbol=marker(f.shape||cfg.shape||"circle",color,f.size||cfg.size); }
+          const attrs=Object.assign({},f.attrs||{},{__cls:cls||"",__name:(f.attrs&&(f.attrs[cfg.nameField||"name"]||f.attrs.name||f.attrs.NAME))||f.name||""});
+          const gr=new Graphic({geometry,symbol,attributes:attrs});
+          if(cfg.popup){ gr.popupTemplate={title:cfg.popup.title||"{__name}",content:typeof cfg.popup.content==="function"?(ev)=>cfg.popup.content(ev.graphic.attributes,cls):cfg.popup.content}; }
+          g.add(gr);
+          if(cfg.labels&&!f.rings&&!f.path) g.add(label(f.lon,f.lat,attrs.__name,color,cfg.labelSize||9,cfg.labelOffset==null?9:cfg.labelOffset));
+        });
+        return g;
+      }
+      // Notes layer
+      function notesLayer(){
+        const g=new GraphicsLayer({title:"Map notes",visible:map.cfg.notes?map.cfg.notes.visible!==false:true});
+        (A.notes||[]).forEach(n=>{
+          g.add(new Graphic({geometry:pt(n.lon,n.lat),
+            symbol:{type:"simple-marker",style:"square",size:16,color:[255,255,255,.95],outline:{color:getComputedStyle(document.documentElement).getPropertyValue("--accent").trim()||"#1B2A3C",width:2.5}},
+            attributes:{id:n.id,title:n.title,text:n.text,__name:n.title},
+            popupTemplate:{title:"{title}",content:"{text}"}}));
+          g.add(label(n.lon,n.lat,n.title,getComputedStyle(document.documentElement).getPropertyValue("--accent").trim()||"#1B2A3C",11,-14));
+        });
+        return g;
+      }
+      // Live service layer
+      function featureFrom(cfg){
+        const opts={url:cfg.url,title:cfg.title,visible:!!cfg.visible,outFields:["*"]};
+        if(cfg.definitionExpression) opts.definitionExpression=cfg.definitionExpression;
+        if(cfg.opacity!=null) opts.opacity=cfg.opacity;
+        if(cfg.renderer) opts.renderer=cfg.renderer;
+        else if(!cfg.legendField&&(cfg.color||cfg.shape)) opts.renderer={type:"simple",symbol:marker(cfg.shape||"circle",cfg.color||"#6E6E6E",cfg.size)};
+        if(cfg.labelField) opts.labelingInfo=[{labelExpressionInfo:{expression:"$feature."+cfg.labelField},symbol:{type:"text",color:"#1B2A3C",haloColor:"#fff",haloSize:1.5,font:{size:cfg.labelSize||9,family:"Source Sans 3",weight:"bold"}},labelPlacement:"above-right"}];
+        if(cfg.popup) opts.popupTemplate={title:cfg.popup.title||("{"+(cfg.nameField||"NAME")+"}"),content:typeof cfg.popup.content==="function"?(ev)=>cfg.popup.content(ev.graphic.attributes,classify(ev.graphic.attributes[cfg.legendField||cfg.classField])):cfg.popup.content};
+        return new FeatureLayer(opts);
+      }
+      // Distinct-value renderer + legend values for a live layer
+      function styleLive(cfg,L){
+        const f=cfg.legendField; if(!f||cfg.renderer||cfg.legend==="none"||Array.isArray(cfg.legend)) return Promise.resolve();
+        return L.queryFeatures({where:"1=1",outFields:[f],returnGeometry:false,returnDistinctValues:true}).then(res=>{
+          const vals=[...new Set(res.features.map(x=>x.attributes[f]).filter(v=>v!=null&&String(v).trim()!==""))];
+          map.values[cfg.key]=vals.map(v=>({value:v,cls:classify(v)}));
+          const poly=L.geometryType==="polygon", ln=L.geometryType==="polyline";
+          L.renderer={type:"unique-value",field:f,
+            uniqueValueInfos:vals.map(v=>{const c=colorOf(classify(v)); return {value:v,label:String(v),symbol:poly?fill(c,cfg.fillOpacity==null?.45:cfg.fillOpacity):ln?line(c,cfg.size||3):marker(cfg.shape||"circle",c,cfg.size)};}),
+            defaultSymbol:poly?fill("#6E6E6E",.35):ln?line("#6E6E6E",2):marker(cfg.shape||"circle","#6E6E6E",cfg.size)};
+          renderLegend();
+        }).catch(err=>{ console.warn("Could not read values for",cfg.key,err&&err.message); map.values[cfg.key]=[{value:"Features",cls:"other"}]; renderLegend(); });
+      }
+
+      const built=[];
+      LAYERS.forEach(cfg=>{
+        let L;
+        if(cfg.key==="notes") L=notesLayer();
+        else if(cfg.url) L=featureFrom(cfg);
+        else L=graphicsFrom(cfg);
+        map.layers[cfg.key]=L; built.push(L);
+      });
+      const game=new GraphicsLayer({title:"Game markers"}); map.layers.__game=game;
+      const m=new Map({basemap:MAPCFG.basemap,layers:[...built.slice().reverse(),game]}); // first in config = top of panel = drawn on top
+      const view=new MapView({container:"viewDiv",map:m,center:MAPCFG.center,zoom:MAPCFG.zoom,
+        constraints:{minZoom:MAPCFG.minZoom,maxZoom:MAPCFG.maxZoom},popup:{dockEnabled:false,dockOptions:{buttonEnabled:false}}});
+      map.view=view;
+
+      // Load live services; swap in fallbacks when they fail
+      LAYERS.filter(c=>c.url).forEach(cfg=>{
+        const L=map.layers[cfg.key];
+        L.load().then(()=>styleLive(cfg,L)).catch(err=>{
+          console.warn("Layer unavailable:",cfg.key,err&&err.message);
+          const idx=m.layers.indexOf(L); m.remove(L);
+          if(cfg.features&&cfg.features.length){
+            const fbL=graphicsFrom(Object.assign({},cfg,{visible:L.visible})); m.add(fbL,Math.max(0,idx)); map.layers[cfg.key]=fbL; map.fallback[cfg.key]=true;
+          } else { map.unavailable[cfg.key]=true; delete map.layers[cfg.key]; if(map.ready&&mode==="mission") renderMission(); }
+          refreshStatus(); renderLayerList(); renderLegend();
+        });
+      });
+
+      view.when(()=>{
+        map.ready=true; $("mapError").classList.remove("show"); refreshStatus();
+        renderMission();
+        reactiveUtils.watch(()=>view.popup&&view.popup.selectedFeature,(g)=>{
+          if(g&&g.layer===map.layers.notes&&g.attributes&&g.attributes.id){
+            map.openedNotes[g.attributes.id]=true;
+            if(typeof map.onNoteOpen==="function") map.onNoteOpen(g.attributes.id);
+          }
+        });
+        if(typeof A.onMapReady==="function") A.onMapReady(api);
+      },(err)=>{ console.error(err); mapFailed(); });
+      view.on("click",(ev)=>{ if(map.clickHandler) map.clickHandler(ev); });
+      renderLayerList(); renderLegend();
+    }catch(e){ console.error(e); mapFailed(); }
+  }, function(err){ console.error(err); mapFailed(); });
+}
+function mapFailed(){ $("mapError").classList.add("show"); status("Map unavailable",true); map.ready=false; map.failed=true; renderMission(); }
+
+function setLayer(key,on){
+  const cb=document.querySelector(`#layersList input[data-layer="${key}"]`); if(cb) cb.checked=on;
+  if(map.layers[key]) map.layers[key].visible=on; else if(map.cfg[key]) map.cfg[key].visible=on;
+  renderLegend();
+}
+const layerOn=(k)=>map.layers[k]?!!map.layers[k].visible:(!map.failed&&!!(map.cfg[k]&&map.cfg[k].visible));
+function allLayers(on){ LAYERS.filter(l=>!l.exploreHidden).forEach(l=>setLayer(l.key,on)); }
+function renderLayerList(){
+  const ul=$("layersList"); ul.innerHTML="";
+  LAYERS.forEach(l=>{
+    const un=map.unavailable[l.key];
+    const li=h(`<li><label class="${un?"unavailable":""}"><input type="checkbox" data-layer="${esc(l.key)}" ${layerOn(l.key)?"checked":""} ${un?"disabled":""}> ${esc(l.title)}${un?" (unavailable)":""}</label></li>`);
+    li.querySelector("input").addEventListener("change",(e)=>setLayer(l.key,e.target.checked));
+    ul.appendChild(li);
+  });
+}
+function goBookmark(name){
+  const b=BOOKMARKS.find(x=>x.name===name); if(!b||!map.ready) return;
+  const ext=new map.modules.Extent({xmin:b.xmin,ymin:b.ymin,xmax:b.xmax,ymax:b.ymax,spatialReference:{wkid:4326}});
+  map.view.goTo(ext).catch(()=>{}); $("bookmarks").value=String(BOOKMARKS.indexOf(b));
+}
+function goTo(target){ if(map.ready) map.view.goTo(target).catch(()=>{}); }
+function banner(html){ const b=$("mapBanner"); if(!html){b.classList.remove("show");b.innerHTML="";return;} b.innerHTML=html; b.classList.add("show"); }
+const swatch=(shape,color)=>shape==="cross"?`<span class="sw cross" style="color:${color}">+</span>`:shape==="line"?`<span class="sw line" style="border-top-color:${color}"></span>`:shape==="tri"?`<span class="sw tri" style="border-bottom-color:${color}"></span>`:`<span class="sw ${shape==="circle"?"dot":shape==="square"?"sq":shape==="diamond"?"dia":""}" style="background:${color}"></span>`;
+function legendRows(cfg){
+  if(cfg.legend==="none") return "";
+  if(cfg.legend==="notes") return `<div><span class="sw note"></span>Click a note to read it</div>`;
+  if(Array.isArray(cfg.legend)) return cfg.legend.map(r=>`<div>${swatch(r.shape||cfg.shape||"square",r.color)}${esc(r.label)}</div>`).join("");
+  const L=map.layers[cfg.key], isFallback=map.fallback[cfg.key]||!cfg.url;
+  const shapeFor=(f)=>(f&&f.rings)?"square":(f&&f.path)?"line":(cfg.shape||"circle");
+  if(isFallback){
+    const feats=cfg.features||[]; const seen=new Map();
+    feats.forEach(f=>{ const cls=f.cls||(cfg.classField&&f.attrs?classify(f.attrs[cfg.classField]):null); if(cls&&!seen.has(cls)) seen.set(cls,shapeFor(f)); });
+    if(!seen.size) return `<div>${swatch(shapeFor(feats[0]),cfg.color||"#6E6E6E")}${esc(cfg.legendLabel||cfg.title)}</div>`;
+    return [...seen].map(([cls,shape])=>`<div>${swatch(shape,colorOf(cls))}${esc(labelOf(cls))}</div>`).join("");
+  }
+  if(!cfg.legendField||cfg.renderer){ return `<div>${swatch(L&&L.geometryType==="polygon"?"square":(cfg.shape||"circle"),cfg.color||"#6E6E6E")}${esc(cfg.legendLabel||cfg.title)}</div>`; }
+  const vals=map.values[cfg.key]; if(!vals) return `<div class="hint">Loading…</div>`;
+  const shape=L&&L.geometryType==="polygon"?"square":L&&L.geometryType==="polyline"?"line":(cfg.shape||"circle");
+  return vals.map(v=>`<div>${swatch(shape,colorOf(v.cls))}${esc(v.value)}</div>`).join("");
+}
+function renderLegend(){
+  const rows=[];
+  LAYERS.forEach(cfg=>{ if(!layerOn(cfg.key)||cfg.legend==="none") return; const r=legendRows(cfg); if(r) rows.push(`<h5>${esc(cfg.legendTitle||cfg.title)}</h5>${r}`); });
+  $("legend").innerHTML=rows.join("");
+}
+function wireMapTools(){
+  const tg=$("layersToggle"), list=$("layersList");
+  tg.addEventListener("click",()=>{ const open=list.classList.toggle("collapsed")===false; tg.textContent=open?"Hide":"Show"; tg.setAttribute("aria-expanded",String(open)); });
+  const lg=$("legendToggle"), lbody=$("legend");
+  lg.addEventListener("click",()=>{ const open=lbody.classList.toggle("collapsed")===false; lg.textContent=open?"Hide":"Show"; lg.setAttribute("aria-expanded",String(open)); });
+  const sel=$("bookmarks");
+  if(BOOKMARKS.length){ $("bookmarksPanel").hidden=false;
+    const bt=$("bookmarksToggle"), bb=$("bookmarksBody");
+    bt.addEventListener("click",()=>{ const open=bb.classList.toggle("collapsed")===false; bt.textContent=open?"Hide":"Show"; bt.setAttribute("aria-expanded",String(open)); });
+    sel.innerHTML=`<option value="">Select a bookmark…</option>`+BOOKMARKS.map((b,i)=>`<option value="${i}">${esc(b.name)}</option>`).join(""); sel.addEventListener("change",()=>{ if(sel.value!=="") goBookmark(BOOKMARKS[+sel.value].name); }); }
+  const mb=$("btnMeasure"); if(MAPCFG.measure){ mb.hidden=false; mb.addEventListener("click",()=>toggleMeasure()); }
+}
+function toggleMeasure(force){
+  const btn=$("btnMeasure"); const on=(typeof force==="boolean")?force:!map.measure;
+  if(on&&map.ready&&!map.measure){ map.measure=new map.modules.DistanceMeasurement2D({view:map.view,unit:MAPCFG.measureUnit||"miles"}); map.view.ui.add(map.measure,"top-left"); map.measure.viewModel.start(); btn.classList.add("on"); btn.setAttribute("aria-pressed","true"); }
+  else if(!on&&map.measure){ map.view.ui.remove(map.measure); map.measure.destroy(); map.measure=null; btn.classList.remove("on"); btn.setAttribute("aria-pressed","false"); }
+}
+function clearGame(){ if(map.layers.__game) map.layers.__game.removeAll(); map.clickHandler=null; map.onNoteOpen=null; banner(""); }
+function milesBetween(p1,p2){ const g=map.modules.geometryEngine, w=map.modules.wmUtils; const a=w.geographicToWebMercator(p1), b=w.geographicToWebMercator(p2); return g.geodesicLength({type:"polyline",paths:[[[a.x,a.y],[b.x,b.y]]],spatialReference:{wkid:3857}},"miles"); }
+// attribute accessors that work for live services and built-in layers alike
+const nameOf=(a)=>a.__name||a.name||a.NAME||a.Name||"";
+const clsOf=(a,cfg)=>a.__cls||classify(a[(cfg&&(cfg.legendField||cfg.classField))||"ROOT"]||a.cls||"");
+const valueOf=(a,cfg)=>a[(cfg&&(cfg.legendField||cfg.classField))]||a.ROOT||a.lang||a.power||labelOf(clsOf(a,cfg));
+
+/* ---------- task types ---------- */
+const missionEl=$("mission");
+const TASKS={};
+TASKS.callout=(c,t)=>{ c.appendChild(h(`<div class="callout">${t.html}</div>`)); };
+TASKS.html=(c,t)=>{ c.appendChild(h(`<div>${t.html}</div>`)); };
+
+TASKS.mcq=(container,{id,points,question,choices,correct,explain})=>{
+  const card=h(`<div class="task"><span class="pts">${points} pts</span><h3>${question}</h3><div class="choices"></div><div class="feedback" hidden></div></div>`);
+  const ch=card.querySelector(".choices"), f=card.querySelector(".feedback"); const done=taskDone(id);
+  choices.forEach((c,i)=>{
+    const b=h(`<button type="button">${c}</button>`);
+    if(done){ b.disabled=true; if(i===correct) b.classList.add("correct"); }
+    b.addEventListener("click",()=>{
+      const ok=i===correct; ch.querySelectorAll("button").forEach(x=>x.disabled=true);
+      b.classList.add(ok?"correct":"wrong"); if(!ok) ch.querySelectorAll("button")[correct].classList.add("correct");
+      fb(f,ok,(ok?"Correct. ":"Not quite. ")+explain);
+      if(ok){ state.streak++; markTask(id,points+(state.streak>=3?5:0),state.streak>=3?"points (streak bonus)":"points"); }
+      else { state.streak=0; markTask(id,Math.max(2,Math.floor(points/3)),"points for trying"); }
+      state.answers[id]=choices[i].replace(/<[^>]+>/g,""); save();
+    });
+    ch.appendChild(b);
+  });
+  if(done) fb(f,true,"Already answered. "+explain);
+  container.appendChild(card);
+};
+
+TASKS.multi=(container,{id,points,question,choices,correct,explain})=>{
+  const card=h(`<div class="task"><span class="pts">${points} pts</span><h3>${question}</h3><p class="hint">Select all that apply, then check.</p><div class="choices"></div><button class="primary" type="button">Check answer</button><div class="feedback" hidden></div></div>`);
+  const ch=card.querySelector(".choices"), f=card.querySelector(".feedback"), btn=card.querySelector("button.primary");
+  choices.forEach((c,i)=>ch.appendChild(h(`<label><input type="checkbox" value="${i}"> <span>${c}</span></label>`)));
+  if(taskDone(id)){ btn.disabled=true; fb(f,true,"Already answered. "+explain); ch.querySelectorAll("input").forEach(x=>{x.disabled=true;x.checked=correct.includes(+x.value);}); }
+  btn.addEventListener("click",()=>{
+    const picked=[...ch.querySelectorAll("input:checked")].map(x=>+x.value);
+    const right=picked.filter(p=>correct.includes(p)).length, wrong=picked.length-right, ok=right===correct.length&&wrong===0;
+    btn.disabled=true; ch.querySelectorAll("input").forEach(x=>x.disabled=true);
+    fb(f,ok,(ok?"Correct. ":`You found ${right} of ${correct.length}${wrong?` and picked ${wrong} that did not fit`:""}. `)+explain);
+    markTask(id,ok?points:Math.max(2,Math.round(points*right/correct.length)-wrong*2),"points");
+    state.answers[id]=picked.map(p=>choices[p].replace(/<[^>]+>/g,"")); save();
+  });
+  container.appendChild(card);
+};
+
+TASKS.numeric=(container,{id,points,title,text,min,max,unit,explain,placeholder,skipValue})=>{
+  const card=h(`<div class="task"><span class="pts">${points} pts</span><h3>${title}</h3><p>${text||""}</p>
+    <div class="row"><label for="num_${id}" class="visually-hidden">${esc(title)}</label><input type="number" id="num_${id}" step="any" placeholder="${esc(placeholder||unit||"")}"><button class="primary" type="button">Check</button></div><div class="feedback" hidden></div></div>`);
+  const f=card.querySelector(".feedback"), inp=card.querySelector("input"), btn=card.querySelector("button.primary");
+  btn.addEventListener("click",()=>{
+    const v=parseFloat(inp.value); if(isNaN(v)){ fb(f,false,"Enter a number first."); return; }
+    const ok=v>=min&&v<=max; fb(f,ok,(ok?"Correct. ":`You entered ${v}${unit?" "+unit:""}. `)+explain);
+    if(ok){ state.answers[id]=v; markTask(id,points,"points"); btn.disabled=true; }
+  });
+  if(taskDone(id)){ fb(f,true,`Done (you entered ${state.answers[id]}${unit?" "+unit:""}). `+explain); btn.disabled=true; }
+  else if(map.failed&&skipValue!=null){ fb(f,false,`Map unavailable: the answer is about ${skipValue}${unit?" "+unit:""}. Enter it to continue.`); }
+  container.appendChild(card);
+};
+
+TASKS.order=(container,{id,points,title,hint,items})=>{
+  const card=h(`<div class="task"><span class="pts">${points} pts</span><h3>${title}</h3><p class="hint">${hint||"Use the arrows to move items until they are in the right order, then check."}</p><ol class="order-list"></ol><button class="primary" type="button">Check order</button><div class="feedback" hidden></div></div>`);
+  const ol=card.querySelector(".order-list"), btn=card.querySelector("button.primary"), f=card.querySelector(".feedback");
+  let order=state.answers[id]||shuffle(items.map((_,i)=>i)); const done=taskDone(id);
+  function draw(check){
+    ol.innerHTML="";
+    order.forEach((ei,pos)=>{
+      const right=ei===pos;
+      const li=h(`<li><span class="num">${pos+1}</span><span>${items[ei].t}${check||done?` <span class="hint">(${items[ei].d||""})</span> <span class="visually-hidden">${right?"correct position":"wrong position"}</span><span aria-hidden="true">${right?" ✓":" ✗"}</span>`:""}</span><span class="mv"><button type="button" aria-label="Move up">↑</button><button type="button" aria-label="Move down">↓</button></span></li>`);
+      if(check||done) li.classList.add(right?"right":"wrong");
+      const [up,dn]=li.querySelectorAll("button"); up.disabled=pos===0||done; dn.disabled=pos===order.length-1||done;
+      up.addEventListener("click",()=>{[order[pos-1],order[pos]]=[order[pos],order[pos-1]];draw();});
+      dn.addEventListener("click",()=>{[order[pos+1],order[pos]]=[order[pos],order[pos+1]];draw();});
+      ol.appendChild(li);
+    });
+  }
+  draw(false);
+  if(done){ btn.disabled=true; fb(f,true,"Already completed."); }
+  btn.addEventListener("click",()=>{
+    const right=order.filter((ei,pos)=>ei===pos).length, ok=right===items.length;
+    state.answers[id]=order; save(); draw(true); btn.disabled=true;
+    fb(f,ok,ok?"Correct: everything is in order.":`${right} of ${items.length} items are in the right position. The details are now shown so you can see the sequence.`);
+    markTask(id,ok?points:Math.round(points*right/items.length),"points");
+    ol.querySelectorAll(".mv button").forEach(b=>b.disabled=true);
+  });
+  container.appendChild(card);
+};
+
+TASKS.free=(container,{id,points,title,text,label,placeholder,minWords,options,buttonLabel,doneLabel})=>{
+  minWords=minWords||50; const saved=state.answers[id]||{};
+  const card=h(`<div class="task"><span class="pts">${points} pts</span><h3>${title}</h3><p>${text||""}</p>
+    ${options?`<div class="choices" id="opts_${id}"></div>`:""}
+    <label for="ta_${id}"><b>${label||"Write your response"}</b> (at least ${minWords} words).</label>
+    <textarea id="ta_${id}" placeholder="${esc(placeholder||"")}"></textarea>
+    <p class="hint" id="wc_${id}">0 words</p>
+    <div class="row"><button class="primary" type="button">${buttonLabel||"Log response"}</button></div>
+    <div class="feedback" hidden></div></div>`);
+  const ta=card.querySelector("textarea"), wc=card.querySelector(`#wc_${id}`), f=card.querySelector(".feedback"), sub=card.querySelector("button.primary");
+  let pick=saved.pick;
+  if(options){ const ch=card.querySelector(`#opts_${id}`); options.forEach((o,i)=>{ const b=h(`<button type="button">${o}</button>`); if(pick===i) b.classList.add("correct"); b.addEventListener("click",()=>{ if(taskDone(id)) return; pick=i; ch.querySelectorAll("button").forEach(x=>x.classList.remove("correct")); b.classList.add("correct"); }); ch.appendChild(b); }); }
+  ta.value=saved.text||"";
+  const words=()=>ta.value.trim().split(/\s+/).filter(Boolean).length; const upd=()=>wc.textContent=`${words()} words`; upd(); ta.addEventListener("input",upd);
+  const finished=doneLabel||"Response logged.";
+  if(taskDone(id)){ ta.disabled=true; sub.disabled=true; card.querySelectorAll(".choices button").forEach(x=>x.disabled=true); fb(f,true,finished); }
+  sub.addEventListener("click",()=>{
+    if(options&&pick===undefined){ fb(f,false,"Choose one of the options first."); return; }
+    if(words()<minWords){ fb(f,false,`Your response has ${words()} words. Add more to reach ${minWords}.`); return; }
+    state.answers[id]={pick,option:options?options[pick]:undefined,text:ta.value}; markTask(id,points,"points"); save();
+    fb(f,true,finished); renderMission();
+  });
+  container.appendChild(card);
+};
+
+TASKS.detective=(container,{id,deck,langs,title,intro,perPoints})=>{
+  const per=perPoints||3, total=deck.length*per;
+  const card=h(`<div class="task"><span class="pts">up to ${total} pts</span><h3>${title||"Name detective"}</h3><p class="hint">${intro||"Look for each name on the map, then choose its language of origin."} ${per} points per correct name.</p><div class="det"></div></div>`);
+  container.appendChild(card); const area=card.querySelector(".det");
+  const prog=state.answers[id]||{index:0,earned:0,log:[]};
+  function render(){
+    area.innerHTML="";
+    if(prog.index>=deck.length){
+      area.appendChild(h(`<div class="feedback good">Detective work complete: ${prog.earned} of ${total} points.</div>`));
+      if(!taskDone(id)){ state.tasks[id]=true; save(); updateFinishBlock(); renderProgress(); renderBadges(); }
+      return;
+    }
+    const item=deck[prog.index];
+    area.appendChild(h(`<p><b>${prog.index+1} of ${deck.length}:</b> What is the language of origin of <b>${esc(item.n)}</b>?</p>`));
+    const ch=h(`<div class="choices inline"></div>`);
+    langs.forEach(k=>{
+      const b=h(`<button type="button">${esc(labelOf(k).replace(" (Indigenous)",""))}</button>`);
+      b.addEventListener("click",()=>{
+        const ok=k===item.lang; ch.querySelectorAll("button").forEach(x=>x.disabled=true);
+        b.classList.add(ok?"correct":"wrong"); if(!ok){ const c=[...ch.querySelectorAll("button")][langs.indexOf(item.lang)]; if(c) c.classList.add("correct"); }
+        const pts=ok?per:0; prog.earned+=pts; prog.log.push({n:item.n,ok});
+        if(ok){ state.streak++; award(pts+(state.streak>=3?2:0),state.streak>=3?"points (streak)":"points"); } else state.streak=0;
+        state.answers[id]=prog; save();
+        area.appendChild(h(`<div class="feedback ${ok?"good":"bad"}">${ok?"Correct.":"Not quite."} <span class="chip" style="background:${colorOf(item.lang)}22;color:${colorOf(item.lang)}">${esc(labelOf(item.lang))}</span> ${item.why||""}</div>`));
+        const next=h(`<button class="primary" type="button" style="margin-top:10px">${prog.index+1<deck.length?"Next name":"Finish"}</button>`);
+        next.addEventListener("click",()=>{ prog.index++; state.answers[id]=prog; save(); render(); });
+        area.appendChild(next);
+      });
+      ch.appendChild(b);
+    });
+    area.appendChild(ch);
+  }
+  render();
+};
+
+TASKS.click=(container,{id,points,title,text,layer,test,success,fail,banner:bannerText})=>{
+  const card=h(`<div class="task"><span class="pts">${points} pts</span><h3>${title}</h3><p>${text||""}</p><div class="feedback" hidden></div></div>`);
+  const f=card.querySelector(".feedback"); container.appendChild(card); const cfg=map.cfg[layer];
+  if(taskDone(id)){ fb(f,true,"Done. "+(state.answers[id]||"")); return; }
+  if(map.failed||map.unavailable[layer]){ fb(f,false,"The map layer is not available, so this task is skipped."); state.tasks[id]=true; save(); return; }
+  if(!map.ready){ fb(f,null,"Waiting for the map to load…"); return; }
+  banner(bannerText||`<b>Map task:</b> ${title}`);
+  map.clickHandler=async(ev)=>{
+    const L=map.layers[layer]; if(!L) return;
+    const hit=await map.view.hitTest(ev,{include:L});
+    const g=hit.results.find(r=>r.graphic&&r.graphic.attributes&&nameOf(r.graphic.attributes));
+    if(!g) return; const a=g.graphic.attributes; const ctx={name:nameOf(a),cls:clsOf(a,cfg),value:valueOf(a,cfg),attrs:a};
+    if(!test||test(ctx)){ const msg=success?success(ctx):`<b>${esc(ctx.name)}</b>`; fb(f,true,msg); state.answers[id]=msg.replace(/<[^>]+>/g,""); markTask(id,points,"points"); banner(""); map.clickHandler=null; }
+    else fb(f,false,fail?fail(ctx):`${esc(ctx.name)} does not fit. Try again.`);
+  };
+};
+
+TASKS.notes=(container,{id,points,noteIds,title,text})=>{
+  const card=h(`<div class="task"><span class="pts">${points} pts</span><h3>${title}</h3><p>${text||""}</p><ul class="steps"></ul><div class="feedback" hidden></div></div>`);
+  const ul=card.querySelector(".steps"), f=card.querySelector(".feedback"); const opened=state.answers[id]||{};
+  function draw(){ ul.innerHTML=""; noteIds.forEach(n=>{ const note=(A.notes||[]).find(x=>x.id===n)||{title:n}; ul.appendChild(h(`<li class="${opened[n]?"done":"active"}">Open the <b>${esc(note.title)}</b> note${opened[n]?" — read":""}</li>`)); }); }
+  draw(); container.appendChild(card);
+  if(taskDone(id)){ fb(f,true,noteIds.every(n=>opened[n])?"Done. Notes read.":"Done (map task skipped)."); return; }
+  if(map.failed){ fb(f,false,"The map is not available, so this task is skipped."); state.tasks[id]=true; save(); return; }
+  if(!map.ready){ fb(f,null,"Waiting for the map to load…"); return; }
+  banner("<b>Click the white square notes</b> on the map to read them.");
+  map.onNoteOpen=(nid)=>{
+    if(!noteIds.includes(nid)||opened[nid]) return;
+    opened[nid]=true; state.answers[id]=opened; save(); draw(); award(Math.floor(points/noteIds.length),"points");
+    if(noteIds.every(n=>opened[n])){ state.tasks[id]=true; save(); fb(f,true,"Done. Notes read."); banner(""); updateFinishBlock(); renderProgress(); renderBadges(); }
+  };
+};
+
+TASKS.button=(container,{id,points,label,callout,bookmark,layersOn,layersOff})=>{
+  if(callout) container.appendChild(h(`<div class="callout">${callout}</div>`));
+  const row=h(`<div class="row" style="margin:${callout?"-4px":"0"} 0 14px"><button class="secondary" type="button">${label}</button></div>`);
+  row.querySelector("button").addEventListener("click",()=>{ if(bookmark) goBookmark(bookmark); (layersOff||[]).forEach(k=>setLayer(k,false)); (layersOn||[]).forEach(k=>setLayer(k,true)); if(id) markTask(id,points||0,"points"); });
+  container.appendChild(row);
+  if(id&&map.failed&&!taskDone(id)){ state.tasks[id]=true; save(); }
+};
+
+TASKS.custom=(container,t)=>{ t.render(container,api,t); };
+
+/* ---------- sections ---------- */
+function renderMission(){
+  renderProgress(); renderBadges();
+  if(mode==="explore") return;
+  missionEl.innerHTML=""; clearGame(); toggleMeasure(false);
+  const sec=SECTIONS.find(s=>s.id===state.mission)||SECTIONS[0]; state.mission=sec.id;
+  const c=missionEl;
+  c.appendChild(h(`<h2>${esc(sec.title)}</h2>`));
+  if(sec.question) c.appendChild(h(`<p class="question-head">${sec.question}</p>`));
+  if(sec.intro) c.appendChild(h(`<div>${sec.intro}</div>`));
+  if(sec.layers) allLayers(false), sec.layers.forEach(k=>setLayer(k,true));
+  if(sec.bookmark) goBookmark(sec.bookmark); else if(sec.goTo) goTo(sec.goTo);
+  sec.tasks.forEach(t=>{ const fn=TASKS[t.type]; if(!fn){ console.warn("Unknown task type",t.type); return; } fn(c,t); });
+  const idx=ORDER.indexOf(sec.id);
+  finishBlock(c,sec.id,ORDER[idx+1]||null,sectionTaskIds(sec.id));
+  if(!ORDER[idx+1]&&sectionTaskIds(sec.id).every(taskDone)) summaryBox(c);
+  missionEl.scrollTop=0;
+}
+function finishBlock(container,missionId,nextId,requiredTasks){
+  missionEl._finish={missionId,nextId,requiredTasks};
+  container.appendChild(h(`<div class="task" id="finishBlock"></div>`)); updateFinishBlock();
+}
+function updateFinishBlock(){
+  const fk=missionEl._finish, wrap=$("finishBlock"); if(!fk||!wrap) return;
+  const {missionId,nextId,requiredTasks}=fk; const allDone=requiredTasks.every(taskDone);
+  wrap.style.borderColor=allDone?"var(--ok)":"var(--rule)";
+  wrap.innerHTML=`<h3>${allDone?"Section complete":"Finish every task to unlock the next section"}</h3><p class="hint">${requiredTasks.filter(taskDone).length} of ${requiredTasks.length} tasks done.</p><div class="row"></div>`;
+  if(allDone){
+    earnBadge(missionId);
+    if(nextId){ const b=h(`<button class="primary" type="button">Continue to ${esc(TITLES[nextId])}</button>`); b.addEventListener("click",()=>{state.mission=nextId;save();renderMission();}); wrap.querySelector(".row").appendChild(b); }
+  }
+}
+function summaryBox(c){
+  const rows=(typeof A.summary==="function"?A.summary(state):[]).concat([["Score",state.score+" points"],["Badges",`${state.badges.length} of ${BADGES.length}`]]);
+  const s=h(`<div class="summary-box"><h3 style="font-family:var(--serif);margin:0 0 8px">${esc(A.summaryTitle||"Your field notes")}</h3><dl>${rows.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
+    <div class="row" style="margin-top:12px"><button class="primary" type="button" id="dl">Download my answers</button><button class="secondary" type="button" id="cp">Copy to clipboard</button></div></div>`);
+  c.appendChild(s);
+  s.querySelector("#dl").addEventListener("click",()=>{ const blob=new Blob([buildReport()],{type:"text/plain"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=(A.slug||"geoinquiry")+"-answers.txt"; a.click(); });
+  s.querySelector("#cp").addEventListener("click",()=>{ navigator.clipboard.writeText(buildReport()).then(()=>toast("Copied")).catch(()=>toast("Copy failed; use Download")); });
+}
+function buildReport(){
+  const a=state.answers, L=[];
+  L.push(`${A.title} — student answers`); L.push("Submitted: "+new Date().toLocaleString());
+  L.push("Score: "+state.score+" | Badges: "+state.badges.map(b=>BADGES.find(x=>x.id===b).name).join(", ")); L.push("");
+  SECTIONS.forEach(sec=>{
+    L.push(`== ${sec.title} ==`);
+    sec.tasks.forEach(t=>{
+      if(!t.id||a[t.id]==null) return; const v=a[t.id]; const lbl=(t.question||t.title||t.label||t.id).replace(/<[^>]+>/g,"");
+      if(t.type==="detective") L.push(`${lbl}: ${v.earned} pts; ${v.log.map(x=>x.n+(x.ok?" ✓":" ✗")).join(", ")}`);
+      else if(t.type==="free") L.push(`${lbl}: ${v.option?v.option+" — ":""}${v.text}`);
+      else if(t.type==="notes") L.push(`${lbl}: ${Object.keys(v).join(", ")}`);
+      else if(t.type==="order") L.push(`${lbl}: order submitted ${v.map(x=>x+1).join(",")}`);
+      else if(Array.isArray(v)) L.push(`${lbl}: ${v.join(" | ")}`);
+      else L.push(`${lbl}: ${v}`);
+    });
+    L.push("");
+  });
+  return L.join("\n");
+}
+
+/* ---------- modes ---------- */
+let mode="mission";
+function setMode(next){
+  if(next===mode) return; mode=next;
+  document.body.classList.toggle("mode-explore",mode==="explore");
+  $("modeMission").setAttribute("aria-pressed",String(mode==="mission"));
+  $("modeExplore").setAttribute("aria-pressed",String(mode==="explore"));
+  if(mode==="explore"){ clearGame(); toggleMeasure(false); allLayers(true); if(typeof A.onExplore==="function") A.onExplore(api); }
+  else renderMission();
+  if(map.ready&&map.view) setTimeout(()=>{ try{ map.view.resize(); }catch(e){} },50);
+}
+$("modeMission").addEventListener("click",()=>setMode("mission"));
+$("modeExplore").addEventListener("click",()=>setMode("explore"));
+
+/* ---------- modals (focus-trapped) ---------- */
+const modalBack=$("modalBack"), modalBody=$("modalBody"); let lastFocus=null;
+function openModal(html){
+  modalBody.innerHTML=`<button class="secondary close" type="button">Close</button>`+html;
+  const h2=modalBody.querySelector("h2"); if(h2){ h2.id="modalTitle"; modalBack.setAttribute("aria-labelledby","modalTitle"); }
+  lastFocus=document.activeElement; modalBack.classList.add("show");
+  document.querySelector("header").inert=true; document.querySelector("main").inert=true;
+  modalBody.querySelector(".close").focus();
+}
+function closeModal(){ modalBack.classList.remove("show"); document.querySelector("header").inert=false; document.querySelector("main").inert=false; if(lastFocus&&lastFocus.focus) lastFocus.focus(); }
+modalBack.addEventListener("click",e=>{ if(e.target===modalBack||e.target.classList.contains("close")) closeModal(); });
+document.addEventListener("keydown",e=>{
+  if(!modalBack.classList.contains("show")) return;
+  if(e.key==="Escape") closeModal();
+  if(e.key==="Tab"){ const f=[...modalBody.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])')].filter(x=>!x.disabled); if(!f.length) return; const first=f[0], last=f[f.length-1]; if(e.shiftKey&&document.activeElement===first){ last.focus(); e.preventDefault(); } else if(!e.shiftKey&&document.activeElement===last){ first.focus(); e.preventDefault(); } }
+});
+const FOOTER=`
+  <div class="modal-footer">
+  <p class="footer-left"><a href="https://trbaker.github.io/geoinquiries" target="_blank" rel="noopener">GeoInquiries Lab</a></p>
+  <p class="footer-left">Designed by <a href="https://tbaker.com" target="_blank" rel="noopener">Tom Baker</a></p>
+  <nav class="policy-links" aria-label="Policies"><a href="https://trbaker.github.io/geoinquiries/support/privacy.html" target="_blank" rel="noopener">Privacy</a><a href="https://trbaker.github.io/geoinquiries/support/accessibility.html" target="_blank" rel="noopener">Accessibility</a><a href="https://trbaker.github.io/geoinquiries/support/termsofuse.html" target="_blank" rel="noopener">Terms of use</a></nav>
+  <p class="cc-badge"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener"><img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-nc-sa.svg" alt="Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license" width="88" height="31" onerror="this.replaceWith(Object.assign(document.createElement('b'),{textContent:'CC BY-NC-SA 4.0'}))"></a></p>
+  </div>`;
+function layerTable(){
+  return `<table><tr><th>Layer</th><th>Source</th><th>Notes</th></tr>
+    <tr><td>Basemap</td><td>Esri "${esc(MAPCFG.basemap)}"</td><td>Loaded through the ArcGIS Maps SDK for JavaScript 4.30.</td></tr>
+    ${LAYERS.map(l=>`<tr><td>${esc(l.title)}</td><td>${l.url?`<code>${esc(l.url)}</code>`:"Built into this app"}</td><td>${l.sourceNote||""}${l.url&&l.features?" Falls back to a built-in substitute layer if the service is unavailable.":""}</td></tr>`).join("")}
+  </table>`;
+}
+const DEFAULT_HELP=`<h2>How to play</h2>
+  <p>You work through ${ORDER.length} sections in the same order as the GeoInquiry lesson: ${SECTIONS.map(s=>esc(s.title)).join(", ")}. Each section unlocks the next once every task is done. Earn points for correct answers (a streak of three correct answers adds a bonus) and a badge for each section.</p>
+  <h3>Map controls</h3>
+  <ul>
+    <li>The app has two modes. GeoInquiry mode (the default) walks you through the sections. Explore mode hides the GeoInquiry panel and scoring and turns on every layer so you can use the map freely; switch with the GeoInquiry / Explore buttons in the header.</li>
+    ${BOOKMARKS.length?"<li>Bookmarks (top right of the map) jump to the places named in the lesson.</li>":""}
+    <li>The Layers list (top right) turns map layers on and off; the Legend (bottom left) explains the symbols. Both can be hidden.</li>
+    <li>Click any feature on the map to open its details.${MAPCFG.measure?" Use the ruler button to measure distance: click a start point, then double-click to finish.":""}</li>
+    <li>Your progress saves in this browser. Use Reset to start over.</li>
+  </ul>`;
+$("btnHelp").addEventListener("click",()=>openModal(A.help||DEFAULT_HELP));
+$("btnSources").addEventListener("click",()=>openModal((A.sources||"<h2>Sources and data</h2><h3>Map layers</h3>{{LAYER_TABLE}}").replace("{{LAYER_TABLE}}",layerTable())));
+$("btnTeacher").addEventListener("click",()=>openModal(`<h2>Teacher notes</h2><p><a href="https://esriurl.com/geoinquiries" target="_blank" rel="noopener">GeoInquiries home</a></p>`+(A.teacher||"")+FOOTER));
+$("btnReset").addEventListener("click",()=>{ if(!confirm("Reset all progress and start over?")) return; state=fresh(); save(); if(mode==="explore") setMode("mission"); else renderMission(); });
+
+/* ---------- public api for custom tasks / hooks ---------- */
+const api={A,save,award,markTask,taskDone,toast,h,fb,esc,banner,goBookmark,goTo,setLayer,layerOn,map,milesBetween,nameOf,clsOf,valueOf,classify,colorOf,labelOf,PALETTE,renderMission,updateFinishBlock,renderLegend,openModal};
+Object.defineProperty(api,"state",{get:()=>state,enumerable:true}); // live: Reset replaces the state object
+window.GeoInquiry=api;
+
+/* ---------- boot ---------- */
+renderBadges(); renderProgress(); wireMapTools(); renderLayerList(); renderMission(); initMap();
+})();
+
+</script>
+</body>
+</html>
