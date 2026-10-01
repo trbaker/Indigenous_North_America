@@ -398,6 +398,7 @@ const esc=(s)=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;
 /* ---------------------------------------------------------------------
    LIVE SERVICES (from the lesson's web map, verified October 2026)
    --------------------------------------------------------------------- */
+const TERR_TILES="f86d9dcd1e8e42e9bdd64b9a24fa8f6c"; // vector tile "image" sublayer (draws the territories)
 const TERR_URL="https://services7.arcgis.com/iFGeGXTAJXnjq0YN/arcgis/rest/services/Indigenous_Territories_of_North_America_view_by_JS/FeatureServer/0";
 const RIVERS_URL="https://services7.arcgis.com/xuAg12SDp2ow0Fb8/arcgis/rest/services/ne_10m_rivers_lake_centerlines/FeatureServer/0";
 const BIOMES_URL="https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/Resolve_Ecoregions/FeatureServer/0";
@@ -494,7 +495,7 @@ function claimCounter(container,api,t){
   if(!api.map.ready){ api.fb(f,null,"Waiting for the map to load…"); return; }
   api.banner(t.banner);
   api.map.clickHandler=async(ev)=>{
-    const L=api.map.layers.territories; if(!L||!L.queryFeatures) return skip(api,t,f);
+    const L=api.queryLayer("territories"); if(!L||!L.queryFeatures) return skip(api,t,f);
     let names=[];
     try{ const r=await L.queryFeatures({geometry:ev.mapPoint,spatialRelationship:"intersects",outFields:["Name"],returnGeometry:false});
          names=[...new Set(r.features.map(g=>g.attributes.Name).filter(Boolean))]; }
@@ -557,7 +558,8 @@ function swipeTask(container,api,t){
     if(swipe) return; api.setLayer("biomes",true); api.setLayer("territories",true);
     require(["esri/widgets/Swipe","esri/core/reactiveUtils"],(Swipe,ru)=>{
       endSwipe(api);
-      swipe=new Swipe({view:api.map.view,leadingLayers:[api.map.layers.biomes],trailingLayers:[api.map.layers.territories],position:50});
+      const parts=(L)=>L&&L.layers?L.layers.toArray():[L]; // swipe the sublayers of a group layer
+      swipe=new Swipe({view:api.map.view,leadingLayers:parts(api.map.layers.biomes),trailingLayers:parts(api.map.layers.territories),position:50});
       api.map.view.ui.add(swipe);
       api.fb(f,null,"Drag the handle across the map. Biomes show on the left, Indigenous Territories on the right.");
       ru.watch(()=>swipe&&swipe.position,(p)=>{
@@ -582,7 +584,7 @@ function biomeProbe(container,api,t){
   if(!api.map.ready){ api.fb(f,null,"Waiting for the map to load…"); return; }
   api.banner(t.banner);
   api.map.clickHandler=async(ev)=>{
-    const B=api.map.layers.biomes, T=api.map.layers.territories; if(!B||!T||!B.queryFeatures) return skip(api,t,f);
+    const B=api.queryLayer("biomes"), T=api.queryLayer("territories"); if(!B||!T||!B.queryFeatures) return skip(api,t,f);
     try{
       const [b,n]=await Promise.all([
         B.queryFeatures({geometry:ev.mapPoint,spatialRelationship:"intersects",outFields:["BIOME_NAME","ECO_NAME"],returnGeometry:false}),
@@ -609,12 +611,12 @@ const LAYERS=[
    popup:{title:"{name}",content:(a)=>`Major river${a.featurecla&&a.featurecla!=="River"?" ("+esc(a.featurecla)+")":""}. Natural Earth rank ${esc(a.scalerank||"")} (1 = largest).`},
    sourceNote:"Natural Earth 1:10m rivers and lake centerlines, filtered to the largest rivers (scalerank 1–5) as in the lesson's web map. The built-in substitute is a simplified sketch of 11 major rivers.",
    features:RIVERS.map(r=>({path:r.p,color:"#2265C9",attrs:{name:r.n,featurecla:"River (generalized)"}}))},
-  {key:"territories",title:"Indigenous Territories of North America",visible:true,url:TERR_URL,nameField:"Name",
+  {key:"territories",title:"Indigenous Territories of North America",visible:true,url:TERR_URL,vectorTile:TERR_TILES,nameField:"Name",labelField:"Name",labelMinScale:4600000,
    legendTitle:"Indigenous Territories",
    legend:[{label:"One People's territory (each its own colour)",color:"#93A87A",shape:"square"},
            {label:"Overlap: colours blend",color:"#6E6A86",shape:"square"}],
    popup:{title:"{Name}",content:(a)=>`This is the territory of the <b>${esc(a.Name)}</b> peoples.${a.description?` To learn more about this community and the sources used to draw this shape, or to suggest a correction, visit the <a href="${esc(a.description)}" target="_blank" rel="noopener">${esc(a.Name)} page on Native Land Digital</a>.`:""}<p class="hint" style="margin-top:6px"><i>Disclaimer: this map does not represent or intend to represent official or legal boundaries of any Indigenous Nation.</i></p>`},
-   sourceNote:"Native Land Digital territories (898 shapes), from the lesson's web map; drawn with the service's own colours. There is no built-in substitute for this layer."},
+   sourceNote:"Native Land Digital territories (898 shapes), from the lesson's web map. Like the web map, this is a group layer: the vector tile layer (item f86d9dcd…) draws the territories and the feature layer supplies popups, labels and the claim counts. There is no built-in substitute for this layer."},
   {key:"biomes",title:"Biomes",visible:false,url:BIOMES_URL,opacity:.6,legend:BIOME_LEGEND,
    popup:{title:"{BIOME_NAME}",content:(a)=>`Ecoregion: <b>${esc(a.ECO_NAME)}</b><br>Realm: ${esc(a.REALM||"")}`},
    sourceNote:"RESOLVE Ecoregions and Biomes 2017 (Esri Living Atlas), from the lesson's web map; drawn with the service's own biome colours at 60% opacity."}
@@ -897,7 +899,7 @@ function renderProgress(){
 const MAPCFG=Object.assign({basemap:"topo-vector",center:[-95,38],zoom:4,minZoom:2,maxZoom:14,measure:false},A.map||{});
 const LAYERS=(A.layers||[]).slice();
 if(A.notes&&A.notes.length&&!LAYERS.some(l=>l.key==="notes")) LAYERS.unshift({key:"notes",title:"Map notes",visible:true,legend:"notes"});
-const map={ready:false,failed:false,view:null,layers:{},cfg:{},fallback:{},unavailable:{},values:{},modules:null,clickHandler:null,onNoteOpen:null,openedNotes:{},measure:null};
+const map={ready:false,failed:false,view:null,layers:{},query:{},tiles:{},cfg:{},fallback:{},unavailable:{},values:{},modules:null,clickHandler:null,onNoteOpen:null,openedNotes:{},measure:null};
 LAYERS.forEach(l=>map.cfg[l.key]=l);
 const BOOKMARKS=A.bookmarks||[];
 
@@ -914,10 +916,11 @@ function initMap(){
   require([
     "esri/Map","esri/views/MapView","esri/layers/GraphicsLayer","esri/layers/FeatureLayer","esri/Graphic",
     "esri/geometry/Point","esri/geometry/Polygon","esri/geometry/Polyline","esri/geometry/Extent",
-    "esri/geometry/support/webMercatorUtils","esri/geometry/geometryEngine","esri/core/reactiveUtils","esri/widgets/DistanceMeasurement2D"
-  ], function(Map,MapView,GraphicsLayer,FeatureLayer,Graphic,Point,Polygon,Polyline,Extent,wmUtils,geometryEngine,reactiveUtils,DistanceMeasurement2D){
+    "esri/geometry/support/webMercatorUtils","esri/geometry/geometryEngine","esri/core/reactiveUtils","esri/widgets/DistanceMeasurement2D",
+    "esri/layers/VectorTileLayer","esri/layers/GroupLayer"
+  ], function(Map,MapView,GraphicsLayer,FeatureLayer,Graphic,Point,Polygon,Polyline,Extent,wmUtils,geometryEngine,reactiveUtils,DistanceMeasurement2D,VectorTileLayer,GroupLayer){
     try{
-      map.modules={Graphic,Point,Polygon,Polyline,Extent,wmUtils,geometryEngine,DistanceMeasurement2D,FeatureLayer,GraphicsLayer};
+      map.modules={Graphic,Point,Polygon,Polyline,Extent,wmUtils,geometryEngine,DistanceMeasurement2D,FeatureLayer,GraphicsLayer,VectorTileLayer,GroupLayer};
       const pt=(lon,lat)=>new Point({longitude:lon,latitude:lat});
       const label=(lon,lat,text,color,size,yoff)=>new Graphic({geometry:pt(lon,lat),
         symbol:{type:"text",color:color||"#1B2A3C",haloColor:"#fff",haloSize:2,text,yoffset:yoff==null?10:yoff,
@@ -965,10 +968,20 @@ function initMap(){
         if(cfg.opacity!=null) opts.opacity=cfg.opacity;
         if(cfg.renderer) opts.renderer=cfg.renderer;
         else if(!cfg.legendField&&(cfg.color||cfg.shape)) opts.renderer={type:"simple",symbol:marker(cfg.shape||"circle",cfg.color||"#6E6E6E",cfg.size)};
-        if(cfg.labelField) opts.labelingInfo=[{labelExpressionInfo:{expression:"$feature."+cfg.labelField},symbol:{type:"text",color:"#1B2A3C",haloColor:"#fff",haloSize:1.5,font:{size:cfg.labelSize||9,family:"Source Sans 3",weight:"bold"}},labelPlacement:"above-right"}];
+        if(cfg.labelField) opts.labelingInfo=[{labelExpressionInfo:{expression:"$feature."+cfg.labelField},minScale:cfg.labelMinScale||0,symbol:{type:"text",color:"#1B2A3C",haloColor:"#fff",haloSize:1.5,font:{size:cfg.labelSize||9,family:"Source Sans 3",weight:"bold"}},labelPlacement:"above-right"}];
         if(cfg.popup) opts.popupTemplate={title:cfg.popup.title||("{"+(cfg.nameField||"NAME")+"}"),content:typeof cfg.popup.content==="function"?(ev)=>cfg.popup.content(ev.graphic.attributes,classify(ev.graphic.attributes[cfg.legendField||cfg.classField])):cfg.popup.content};
-        return new FeatureLayer(opts);
+        if(!cfg.vectorTile) return new FeatureLayer(opts);
+        // Group layer (as in ArcGIS Online "group" items): a vector tile layer draws the map,
+        // a feature layer on top (made transparent once the tiles load) supplies popups, labels and queries.
+        const groupOpacity=opts.opacity; delete opts.opacity; opts.title=cfg.title+" (data)"; opts.visible=true; opts.listMode="hide"; opts.legendEnabled=false;
+        const FL=new FeatureLayer(opts);
+        const vtSrc=cfg.vectorTile; const vt=new VectorTileLayer(/^https?:/.test(vtSrc)?{url:vtSrc,title:cfg.title+" (image)"}:{portalItem:{id:vtSrc},title:cfg.title+" (image)"});
+        const g=new GroupLayer({title:cfg.title,visible:!!cfg.visible,visibilityMode:"independent",layers:[vt,FL]}); // last = on top
+        if(groupOpacity!=null) g.opacity=groupOpacity;
+        map.query[cfg.key]=FL; map.tiles[cfg.key]=vt;
+        return g;
       }
+      const CLEAR={type:"simple",symbol:{type:"simple-fill",color:[0,0,0,0],outline:{color:[0,0,0,0],width:0}}};
       // Distinct-value renderer + legend values for a live layer
       function styleLive(cfg,L){
         const f=cfg.legendField; if(!f||cfg.renderer||cfg.legend==="none"||Array.isArray(cfg.legend)) return Promise.resolve();
@@ -999,9 +1012,14 @@ function initMap(){
 
       // Load live services; swap in fallbacks when they fail
       LAYERS.filter(c=>c.url).forEach(cfg=>{
-        const L=map.layers[cfg.key];
-        L.load().then(()=>styleLive(cfg,L)).catch(err=>{
+        const L=map.layers[cfg.key], Q=map.query[cfg.key]||L, VT=map.tiles[cfg.key];
+        Q.load().then(()=>{
+          if(!VT) return styleLive(cfg,Q);
+          const own=Q.renderer&&Q.renderer.clone(); if(!cfg.renderer) Q.renderer=CLEAR;
+          VT.load().catch(err=>{ console.warn("Tile layer unavailable for",cfg.key,"- drawing the features instead",err&&err.message); if(own&&!cfg.renderer) Q.renderer=own; });
+        }).catch(err=>{
           console.warn("Layer unavailable:",cfg.key,err&&err.message);
+          delete map.query[cfg.key]; delete map.tiles[cfg.key];
           const idx=m.layers.indexOf(L); m.remove(L);
           if(cfg.features&&cfg.features.length){
             const fbL=graphicsFrom(Object.assign({},cfg,{visible:L.visible})); m.add(fbL,Math.max(0,idx)); map.layers[cfg.key]=fbL; map.fallback[cfg.key]=true;
@@ -1251,7 +1269,7 @@ TASKS.click=(container,{id,points,title,text,layer,test,success,fail,banner:bann
   banner(bannerText||`<b>Map task:</b> ${title}`);
   map.clickHandler=async(ev)=>{
     const L=map.layers[layer]; if(!L) return;
-    const hit=await map.view.hitTest(ev,{include:L});
+    const hit=await map.view.hitTest(ev,{include:map.query[layer]||L});
     const g=hit.results.find(r=>r.graphic&&r.graphic.attributes&&nameOf(r.graphic.attributes));
     if(!g) return; const a=g.graphic.attributes; const ctx={name:nameOf(a),cls:clsOf(a,cfg),value:valueOf(a,cfg),attrs:a};
     if(!test||test(ctx)){ const msg=success?success(ctx):`<b>${esc(ctx.name)}</b>`; fb(f,true,msg); state.answers[id]=msg.replace(/<[^>]+>/g,""); markTask(id,points,"points"); banner(""); map.clickHandler=null; }
@@ -1404,7 +1422,8 @@ $("btnTeacher").addEventListener("click",()=>openModal(`<h2>Teacher notes</h2><p
 $("btnReset").addEventListener("click",()=>{ if(!confirm("Reset all progress and start over?")) return; state=fresh(); save(); if(mode==="explore") setMode("mission"); else renderMission(); });
 
 /* ---------- public api for custom tasks / hooks ---------- */
-const api={A,save,award,markTask,taskDone,toast,h,fb,esc,banner,goBookmark,goTo,setLayer,layerOn,map,milesBetween,nameOf,clsOf,valueOf,classify,colorOf,labelOf,PALETTE,renderMission,updateFinishBlock,renderLegend,openModal};
+const queryLayer=(k)=>map.query[k]||map.layers[k];
+const api={A,queryLayer,save,award,markTask,taskDone,toast,h,fb,esc,banner,goBookmark,goTo,setLayer,layerOn,map,milesBetween,nameOf,clsOf,valueOf,classify,colorOf,labelOf,PALETTE,renderMission,updateFinishBlock,renderLegend,openModal};
 Object.defineProperty(api,"state",{get:()=>state,enumerable:true}); // live: Reset replaces the state object
 window.GeoInquiry=api;
 
