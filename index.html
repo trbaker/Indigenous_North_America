@@ -495,10 +495,9 @@ function claimCounter(container,api,t){
   if(!api.map.ready){ api.fb(f,null,"Waiting for the map to load…"); return; }
   api.banner(t.banner);
   api.map.clickHandler=async(ev)=>{
-    const L=api.queryLayer("territories"); if(!L||!L.queryFeatures) return skip(api,t,f);
+    if(!api.queryLayer("territories")) return skip(api,t,f);
     let names=[];
-    try{ const r=await L.queryFeatures({geometry:ev.mapPoint,spatialRelationship:"intersects",outFields:["Name"],returnGeometry:false});
-         names=[...new Set(r.features.map(g=>g.attributes.Name).filter(Boolean))]; }
+    try{ names=[...new Set((await api.identifyAt("territories",ev.mapPoint)).map(a=>a.Name).filter(Boolean))]; }
     catch(e){ api.fb(f,false,"Could not read the territories there. Try another spot."); return; }
     pin(api,ev.mapPoint,names.length,names.length>=t.goal?"#2F7D4F":"#3D3D3D");
     const b=st(); if(names.length>b.best){ api.state.answers[t.id+"Best"]={best:names.length,names}; api.save(); }
@@ -584,12 +583,10 @@ function biomeProbe(container,api,t){
   if(!api.map.ready){ api.fb(f,null,"Waiting for the map to load…"); return; }
   api.banner(t.banner);
   api.map.clickHandler=async(ev)=>{
-    const B=api.queryLayer("biomes"), T=api.queryLayer("territories"); if(!B||!T||!B.queryFeatures) return skip(api,t,f);
+    if(!api.queryLayer("biomes")||!api.queryLayer("territories")) return skip(api,t,f);
     try{
-      const [b,n]=await Promise.all([
-        B.queryFeatures({geometry:ev.mapPoint,spatialRelationship:"intersects",outFields:["BIOME_NAME","ECO_NAME"],returnGeometry:false}),
-        T.queryFeatureCount({geometry:ev.mapPoint,spatialRelationship:"intersects"})]);
-      const a=b.features[0]&&b.features[0].attributes; if(!a){ api.fb(f,false,"No biome there (open water?). Click on land."); return; }
+      const [b,tl]=await Promise.all([api.identifyAt("biomes",ev.mapPoint,["BIOME_NAME","ECO_NAME"]),api.identifyAt("territories",ev.mapPoint)]);
+      const n=tl.length, a=b[0]; if(!a){ api.fb(f,false,"No biome there (open water?). Click on land."); return; }
       const entry={biome:a.BIOME_NAME,eco:a.ECO_NAME,n};
       const L=log().concat([entry]); api.state.answers[t.id+"Log"]=L; api.save(); draw(); pin(api,ev.mapPoint,n);
       const kinds=new Set(L.map(x=>x.biome));
@@ -708,6 +705,20 @@ const SECTIONS=[
 ];
 
 /* ---------------------------------------------------------------------
+   Teacher notes footer (this activity only): credit the original
+   Esri/MapMaker activity and say "Redesigned by" instead of "Designed by".
+   Runs after the engine's own Teacher notes click handler.
+   --------------------------------------------------------------------- */
+if(typeof document!=="undefined") document.addEventListener("click",(e)=>{
+  if(!e.target.closest||!e.target.closest("#btnTeacher")) return;
+  const foot=document.querySelector("#modalBody .modal-footer"); if(!foot||foot.querySelector(".activity-credit")) return;
+  const by=[...foot.querySelectorAll("p.footer-left")].find(p=>/^\s*Designed by/.test(p.textContent)); if(!by) return;
+  by.firstChild.textContent=by.firstChild.textContent.replace("Designed by","Redesigned by");
+  const credit=document.createElement("p"); credit.className="footer-left activity-credit"; credit.textContent="Original activity and map created by Esri/MapMaker";
+  by.parentNode.insertBefore(credit,by);
+});
+
+/* ---------------------------------------------------------------------
    ACTIVITY
    --------------------------------------------------------------------- */
 window.ACTIVITY={
@@ -715,7 +726,6 @@ window.ACTIVITY={
   title:"Indigenous North America",
   subtitle:"Based on the National Geographic MapMaker lesson · Indigenous territories, biomes and land",
   storageKey:"indigenousNorthAmericaState",
-  credit:"Original activity and map created by Esri/MapMaker",
   theme:{"--header":"#6B6B6B","--header-rule":"#FFD800","--accent":"#3D3D3D","--accent-hover":"#5A5A5A","--callout":"#F1F0EA"},
   map:{basemap:"terrain",center:[-98,40],zoom:4,minZoom:2,maxZoom:12,measure:false},
   bookmarks:BOOKMARKS,
@@ -918,10 +928,10 @@ function initMap(){
     "esri/Map","esri/views/MapView","esri/layers/GraphicsLayer","esri/layers/FeatureLayer","esri/Graphic",
     "esri/geometry/Point","esri/geometry/Polygon","esri/geometry/Polyline","esri/geometry/Extent",
     "esri/geometry/support/webMercatorUtils","esri/geometry/geometryEngine","esri/core/reactiveUtils","esri/widgets/DistanceMeasurement2D",
-    "esri/layers/VectorTileLayer","esri/layers/GroupLayer"
-  ], function(Map,MapView,GraphicsLayer,FeatureLayer,Graphic,Point,Polygon,Polyline,Extent,wmUtils,geometryEngine,reactiveUtils,DistanceMeasurement2D,VectorTileLayer,GroupLayer){
+    "esri/layers/VectorTileLayer","esri/layers/GroupLayer","esri/rest/query"
+  ], function(Map,MapView,GraphicsLayer,FeatureLayer,Graphic,Point,Polygon,Polyline,Extent,wmUtils,geometryEngine,reactiveUtils,DistanceMeasurement2D,VectorTileLayer,GroupLayer,restQuery){
     try{
-      map.modules={Graphic,Point,Polygon,Polyline,Extent,wmUtils,geometryEngine,DistanceMeasurement2D,FeatureLayer,GraphicsLayer,VectorTileLayer,GroupLayer};
+      map.modules={Graphic,Point,Polygon,Polyline,Extent,wmUtils,geometryEngine,DistanceMeasurement2D,FeatureLayer,GraphicsLayer,VectorTileLayer,GroupLayer,restQuery};
       const pt=(lon,lat)=>new Point({longitude:lon,latitude:lat});
       const label=(lon,lat,text,color,size,yoff)=>new Graphic({geometry:pt(lon,lat),
         symbol:{type:"text",color:color||"#1B2A3C",haloColor:"#fff",haloSize:2,text,yoffset:yoff==null?10:yoff,
@@ -1040,9 +1050,9 @@ function initMap(){
         });
         if(typeof A.onMapReady==="function") A.onMapReady(api);
       },(err)=>{ console.error(err); mapFailed(); });
-      // Popups. A group layer's data sublayer is drawn transparent, and hit tests skip invisible
-      // features, so popups are built here: hit-test the drawn layers, then query each visible
-      // group's data layer at the click point (as ArcGIS Map Viewer does).
+      // Popups ("identify"). A group layer's data sublayer is drawn transparent under a vector tile
+      // layer, so popups are built here: hit-test only the ordinary layers (never the tiles), and ask
+      // each visible group's data layer which features contain the click point (see identifyAt).
       const hasGroups=Object.keys(map.tiles).length>0;
       if(hasGroups) view.popupEnabled=false;
       view.on("click",(ev)=>{
@@ -1051,17 +1061,17 @@ function initMap(){
       });
       async function openPopupAt(ev){
         const seq=(map.popupSeq=(map.popupSeq||0)+1);
-        const groupKeys=Object.keys(map.query).filter(k=>map.tiles[k]&&map.layers[k]&&map.layers[k].visible);
-        const keyOf=(lyr)=>LAYERS.find(c=>map.layers[c.key]===lyr||map.query[c.key]===lyr);
-        let hits=[];
-        try{ const r=await view.hitTest(ev); hits=r.results.map(x=>x.graphic).filter(g=>g&&g.layer&&g.layer!==map.layers.__game&&(g.popupTemplate||g.layer.popupTemplate)); }catch(e){}
-        const queried=await Promise.all(groupKeys.map(k=>{ const Q=map.query[k];
-          return Q.queryFeatures({geometry:ev.mapPoint,spatialRelationship:"intersects",outFields:["*"],returnGeometry:true,maxAllowableOffset:view.resolution*2})
-            .then(res=>res.features.map(g=>{ g.layer=Q; g.popupTemplate=Q.popupTemplate; return g; })).catch(()=>[]); }));
+        const groupKeys=Object.keys(map.tiles).filter(k=>map.query[k]&&map.layers[k]&&map.layers[k].visible);
+        const exclude=Object.keys(map.tiles).flatMap(k=>[map.tiles[k],map.query[k]]).concat([map.layers.__game]).filter(Boolean);
+        const hitP=withTimeout(view.hitTest(ev,{exclude}),4000).then(r=>r.results.map(x=>x.graphic).filter(g=>g&&g.layer&&(g.popupTemplate||g.layer.popupTemplate))).catch(e=>{ console.warn("hitTest failed",e); return []; });
+        const qP=Promise.all(groupKeys.map(k=>identifyAt(k,ev.mapPoint).then(list=>list.map(a=>{
+          const Q=map.query[k]; return new Graphic({attributes:a,layer:Q,sourceLayer:Q,popupTemplate:Q.popupTemplate}); })).catch(e=>{ status("Could not identify "+map.cfg[k].title+": "+(e&&e.message||e),true); return []; })));
+        const [hits,queried]=await Promise.all([hitP,qP]);
         if(seq!==map.popupSeq) return; // a newer click won
-        const order=(g)=>{ const c=keyOf(g.layer); return c?LAYERS.indexOf(c):-1; };
-        const feats=hits.filter(g=>!groupKeys.some(k=>g.layer===map.query[k])).concat(...queried).sort((a,b)=>order(a)-order(b));
-        if(feats.length) view.openPopup({features:feats,location:ev.mapPoint}); else view.closePopup();
+        const keyOf=(lyr)=>LAYERS.find(c=>map.layers[c.key]===lyr||map.query[c.key]===lyr);
+        const order=(g)=>{ const c=keyOf(g.layer); return c?LAYERS.indexOf(c):99; };
+        const feats=hits.concat(...queried).sort((a,b)=>order(a)-order(b));
+        if(feats.length){ view.openPopup({features:feats,location:ev.mapPoint}); refreshStatus(); } else view.closePopup();
       }
       renderLayerList(); renderLegend();
     }catch(e){ console.error(e); mapFailed(); }
@@ -1069,6 +1079,18 @@ function initMap(){
 }
 function mapFailed(){ $("mapError").classList.add("show"); status("Map unavailable",true); map.ready=false; map.failed=true; renderMission(); }
 
+const withTimeout=(p,ms)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error("timed out")),ms))]);
+// Attributes of every feature of layer `key` containing a map point. Uses the layer's own query first,
+// then a plain JSON REST query (f=json) if that fails or times out. Works for group (vectorTile) layers.
+async function identifyAt(key,pt,fields){
+  const Q=map.query[key]||map.layers[key], cfg=map.cfg[key]; if(!Q) return [];
+  const params={geometry:pt,spatialRelationship:"intersects",outFields:fields||["*"],returnGeometry:false,where:"1=1"};
+  const tidy=(fs)=>{ const seen=new Set(); return fs.map(f=>f.attributes).filter(a=>{ const id=a[Q.objectIdField||"OBJECTID"]; if(id==null) return true; if(seen.has(id)) return false; seen.add(id); return true; }); };
+  if(Q.queryFeatures){ try{ return tidy((await withTimeout(Q.queryFeatures(params),8000)).features); }catch(e){ console.warn("Layer query failed for",key,"- retrying as JSON",e&&e.message); } }
+  const url=Q.url?(Q.url+(Q.layerId!=null&&!/\/\d+$/.test(Q.url)?"/"+Q.layerId:"")):cfg&&cfg.url; if(!url) return [];
+  const res=await withTimeout(map.modules.restQuery.executeQueryJSON(url,params),10000);
+  return tidy(res.features);
+}
 function setLayer(key,on){
   const cb=document.querySelector(`#layersList input[data-layer="${key}"]`); if(cb) cb.checked=on;
   if(map.layers[key]) map.layers[key].visible=on; else if(map.cfg[key]) map.cfg[key].visible=on;
@@ -1293,7 +1315,7 @@ TASKS.click=(container,{id,points,title,text,layer,test,success,fail,banner:bann
   map.clickHandler=async(ev)=>{
     const L=map.layers[layer]; if(!L) return;
     let a=null;
-    if(map.tiles[layer]&&map.query[layer]){ try{ const r=await map.query[layer].queryFeatures({geometry:ev.mapPoint,spatialRelationship:"intersects",outFields:["*"],returnGeometry:false}); const g=r.features.find(x=>nameOf(x.attributes)); a=g&&g.attributes; }catch(e){} }
+    if(map.tiles[layer]&&map.query[layer]){ try{ a=(await identifyAt(layer,ev.mapPoint)).find(x=>nameOf(x))||null; }catch(e){ console.warn(e); } }
     else { const hit=await map.view.hitTest(ev,{include:L}); const g=hit.results.find(r=>r.graphic&&r.graphic.attributes&&nameOf(r.graphic.attributes)); a=g&&g.graphic.attributes; }
     if(!a) return; const ctx={name:nameOf(a),cls:clsOf(a,cfg),value:valueOf(a,cfg),attrs:a};
     if(!test||test(ctx)){ const msg=success?success(ctx):`<b>${esc(ctx.name)}</b>`; fb(f,true,msg); state.answers[id]=msg.replace(/<[^>]+>/g,""); markTask(id,points,"points"); banner(""); map.clickHandler=null; }
@@ -1420,8 +1442,7 @@ document.addEventListener("keydown",e=>{
 const FOOTER=`
   <div class="modal-footer">
   <p class="footer-left"><a href="https://trbaker.github.io/geoinquiries" target="_blank" rel="noopener">GeoInquiries Lab</a></p>
-  ${A.credit?`<p class="footer-left">${A.credit}</p>`:""}
-  <p class="footer-left">Redesigned by <a href="https://tbaker.com" target="_blank" rel="noopener">Tom Baker</a></p>
+  <p class="footer-left">Designed by <a href="https://tbaker.com" target="_blank" rel="noopener">Tom Baker</a></p>
   <nav class="policy-links" aria-label="Policies"><a href="https://trbaker.github.io/geoinquiries/support/privacy.html" target="_blank" rel="noopener">Privacy</a><a href="https://trbaker.github.io/geoinquiries/support/accessibility.html" target="_blank" rel="noopener">Accessibility</a><a href="https://trbaker.github.io/geoinquiries/support/termsofuse.html" target="_blank" rel="noopener">Terms of use</a></nav>
   <p class="cc-badge"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener"><img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-nc-sa.svg" alt="Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license" width="88" height="31" onerror="this.replaceWith(Object.assign(document.createElement('b'),{textContent:'CC BY-NC-SA 4.0'}))"></a></p>
   </div>`;
@@ -1448,7 +1469,7 @@ $("btnReset").addEventListener("click",()=>{ if(!confirm("Reset all progress and
 
 /* ---------- public api for custom tasks / hooks ---------- */
 const queryLayer=(k)=>map.query[k]||map.layers[k];
-const api={A,queryLayer,save,award,markTask,taskDone,toast,h,fb,esc,banner,goBookmark,goTo,setLayer,layerOn,map,milesBetween,nameOf,clsOf,valueOf,classify,colorOf,labelOf,PALETTE,renderMission,updateFinishBlock,renderLegend,openModal};
+const api={A,queryLayer,identifyAt,save,award,markTask,taskDone,toast,h,fb,esc,banner,goBookmark,goTo,setLayer,layerOn,map,milesBetween,nameOf,clsOf,valueOf,classify,colorOf,labelOf,PALETTE,renderMission,updateFinishBlock,renderLegend,openModal};
 Object.defineProperty(api,"state",{get:()=>state,enumerable:true}); // live: Reset replaces the state object
 window.GeoInquiry=api;
 
