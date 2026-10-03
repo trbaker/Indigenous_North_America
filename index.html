@@ -546,6 +546,18 @@ function transparency(container,api,t){
   r.addEventListener("input",()=>apply(+r.value));
   if(api.map.failed||api.map.unavailable.territories){ r.disabled=true; el.appendChild(api.h(`<p class="hint">The territories layer is not available right now.</p>`)); }
 }
+// Reset button (this activity only): when a reset actually happens (the engine replaces its state
+// object; a cancelled confirm leaves it alone), put every layer back to its starting transparency.
+function resetTransparency(api){
+  LAYERS.forEach(c=>{ const L=api.map.layers[c.key]; if(L) L.opacity=c.opacity!=null?c.opacity:1; });
+  wantedTransparency=0;
+  document.querySelectorAll(".opacity-tool").forEach(el=>{ el.querySelector("input").value=0; el.querySelector("output").textContent="0%"; });
+}
+if(typeof document!=="undefined"){
+  let before=null; const onReset=(e)=>e.target.closest&&e.target.closest("#btnReset");
+  document.addEventListener("click",(e)=>{ if(onReset(e)) before=window.GeoInquiry&&window.GeoInquiry.state; },true);   // before the engine's handler
+  document.addEventListener("click",(e)=>{ const api=window.GeoInquiry; if(onReset(e)&&api&&api.state!==before) resetTransparency(api); }); // after it
+}
 const OPACITY_CSS=`<style>
   .opacity-tool{background:var(--panel);border:1px solid var(--rule);border-left:4px solid var(--header-rule);border-radius:6px;padding:12px 14px;margin:6px 0 16px}
   .opacity-tool label{display:flex;justify-content:space-between;align-items:baseline;font-weight:700;margin-bottom:6px}
@@ -686,7 +698,7 @@ const SECTIONS=[
    {type:"button",id:"anaBiomes",points:5,label:"Turn on Biomes",layersOn:["biomes"],callout:"<b>Step 1:</b> turn on the <b>Biomes</b> layer and look at the legend."},
    {type:"custom",id:"anaSwipe",points:10,title:"Map task: swipe",text:"Start the Swipe tool, then drag its handle to compare the Biomes layer (left) with the Indigenous Territories layer (right).",render:swipeTask},
    {type:"custom",id:"anaProbe",points:15,goal:3,title:"Map task: biome probe",text:"Click the map in <b>three different biomes</b>. For each spot you will see the biome and how many territories are there.",banner:"<b>Map task:</b> click three different biomes.",render:biomeProbe},
-   {type:"order",id:"anaRank",points:15,title:"Rank the squares",hint:"Each place is a 4° × 4° square. Put them in order from the <b>most</b> territories to the <b>fewest</b>, then check.",items:[
+   {type:"order",id:"anaRank",points:15,title:"Rank the squares",hint:"Put each area in order from the <b>most</b> territories to the <b>fewest</b>, then check.",items:[
       {t:"Pacific Northwest coast (temperate conifer forest)",d:"about 74 territories"},
       {t:"Central California (Mediterranean woodland and Sierra forests)",d:"about 36"},
       {t:"Ohio Valley (temperate broadleaf forest)",d:"about 15"},
@@ -723,7 +735,7 @@ const SECTIONS=[
    --------------------------------------------------------------------- */
 const SPLASH=`<div class="splash">
   <h2>Indigenous North America</h2>
-  <p>What can we learn about the past and present of America by looking at maps? How have people, cultures and events shaped the places around this country? How have the natural features of the country shaped those people, cultures and events? In this MapMaker activity, you will explore maps to dive deeper into the people, places and challenges that created the United States.</p>
+  <p>What can we learn about the past and present of America by looking at maps? How have people, cultures and events shaped the places around this country? How have the natural features of the country shaped those people, cultures and events? In this activity, you will explore maps to dive deeper into the people, places and challenges that created the United States.</p>
   <p>This map shows land claimed as the territory of different Indigenous Peoples. Each color on the map represents an Indigenous community that has lived on that land. It includes lands that Indigenous Peoples were forced to move to after the arrival of European settlers. Some of the groups claiming land had large populations, while other claims are from smaller, specific indigenous groups. Many Indigenous claims overlap creating the kaleidoscope effect on the map.</p>
   <div class="splash-actions"><button type="button" class="primary close splash-start">Start exploring</button></div>
 </div>
