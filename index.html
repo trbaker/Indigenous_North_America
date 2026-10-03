@@ -705,6 +705,31 @@ const SECTIONS=[
 ];
 
 /* ---------------------------------------------------------------------
+   Splash screen (this activity only): shown when the app opens, in the
+   engine's dialog (focus trap, Escape closes, page behind is inert).
+   --------------------------------------------------------------------- */
+const SPLASH=`<div class="splash">
+  <p class="splash-kicker">National Geographic MapMaker activity</p>
+  <h2>Indigenous North America</h2>
+  <p>What can we learn about the past and present of America by looking at maps? How have people, cultures and events shaped the places around this country? How have the natural features of the country shaped those people, cultures and events? In this MapMaker activity, you will explore maps to dive deeper into the people, places and challenges that created the United States.</p>
+  <p>This map shows land claimed as the territory of different Indigenous Peoples. Each color on the map represents an Indigenous community that has lived on that land. It includes lands that Indigenous Peoples were forced to move to after the arrival of European settlers. Some of the groups claiming land had large populations, while other claims are from smaller, specific indigenous groups. Many Indigenous claims overlap creating the kaleidoscope effect on the map.</p>
+  <div class="splash-actions"><button type="button" class="primary close splash-start">Start exploring</button></div>
+</div>
+<style>
+  .modal .splash-kicker{margin:0 0 4px;font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+  .modal .splash h2{font-size:2rem;margin:0 0 14px;padding-bottom:10px;border-bottom:4px solid var(--header-rule)}
+  .modal .splash p{font-size:1.05rem;line-height:1.6}
+  .modal .splash-actions{margin-top:20px;display:flex;justify-content:flex-end}
+  .modal .splash-actions .close{float:none;font-size:1.05rem;padding:10px 22px}
+</style>`;
+if(typeof document!=="undefined") document.addEventListener("DOMContentLoaded",()=>{
+  const api=window.GeoInquiry; if(!api||!api.openModal) return;
+  api.openModal(SPLASH);
+  const start=document.querySelector("#modalBody .splash-start"); if(start) start.focus({preventScroll:true});
+  document.getElementById("modalBody").scrollTop=0; // small screens: open at the title, not the button
+});
+
+/* ---------------------------------------------------------------------
    Teacher notes footer (this activity only): credit the original
    Esri/MapMaker activity and say "Redesigned by" instead of "Designed by".
    Runs after the engine's own Teacher notes click handler.
