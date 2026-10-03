@@ -528,20 +528,32 @@ function regionTour(container,api,t){
   else if(api.map.failed) skip(api,t,f,"The map is not available, so this task is skipped.");
 }
 
-// 4. Transparency slider (lesson steps 7 and 12)
+// 4. Transparency slider (lesson steps 7 and 12): a simple tool, not a scored task.
+//    Works on the whole group layer (tiles + data). Remembers the setting until reload.
+let wantedTransparency=0;
 function transparency(container,api,t){
-  const c=card(api,t,`<label for="tr_${t.id}"><b>Transparency of Indigenous Territories:</b> <span class="tv">0%</span></label>
-    <input type="range" id="tr_${t.id}" min="0" max="95" step="5" value="0" style="width:100%">`);
-  const f=c.querySelector(".feedback"), r=c.querySelector("input"), tv=c.querySelector(".tv"); container.appendChild(c);
+  const id="tr_"+(t.key||"tool");
+  const el=api.h(`<div class="opacity-tool">
+    <label for="${id}"><span>Territory transparency</span><output for="${id}">0%</output></label>
+    <input type="range" id="${id}" min="0" max="90" step="5" value="0" aria-describedby="${id}_ends">
+    <div class="ends" id="${id}_ends" aria-hidden="true"><span>Solid</span><span>See-through</span></div>
+  </div>`);
+  container.appendChild(el);
+  const r=el.querySelector("input"), out=el.querySelector("output");
   const L=()=>api.map.layers.territories;
-  const cur=L()&&L().opacity!=null?Math.round((1-L().opacity)*100):0; r.value=cur; tv.textContent=cur+"%";
-  if(api.taskDone(t.id)) api.fb(f,true,"Done. Leave the slider wherever it helps you see the basemap.");
-  if(mapGone(api,["territories"])){ r.disabled=true; return skip(api,t,f); }
-  r.addEventListener("input",()=>{
-    const v=+r.value; tv.textContent=v+"%"; if(L()) L().opacity=1-v/100;
-    if(v>=t.goal&&!api.taskDone(t.id)){ api.state.answers[t.id]=`Set transparency to ${v}%`; api.markTask(t.id,t.points,"points"); api.fb(f,true,"Now the mountains, rivers and coastlines on the basemap show through the territories."); }
-  });
+  const apply=(v)=>{ wantedTransparency=v; r.value=v; out.textContent=v+"%"; if(L()) L().opacity=1-v/100; };
+  apply(L()&&L().opacity!=null&&L().opacity<1?Math.round((1-L().opacity)*100):wantedTransparency);
+  r.addEventListener("input",()=>apply(+r.value));
+  if(api.map.failed||api.map.unavailable.territories){ r.disabled=true; el.appendChild(api.h(`<p class="hint">The territories layer is not available right now.</p>`)); }
 }
+const OPACITY_CSS=`<style>
+  .opacity-tool{background:var(--panel);border:1px solid var(--rule);border-left:4px solid var(--header-rule);border-radius:6px;padding:12px 14px;margin:6px 0 16px}
+  .opacity-tool label{display:flex;justify-content:space-between;align-items:baseline;font-weight:700;margin-bottom:6px}
+  .opacity-tool output{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent)}
+  .opacity-tool input[type=range]{width:100%;accent-color:var(--accent);height:28px;margin:0;cursor:pointer}
+  .opacity-tool .ends{display:flex;justify-content:space-between;font-size:.8rem;color:var(--ink-soft)}
+</style>`;
+if(typeof document!=="undefined") document.addEventListener("DOMContentLoaded",()=>document.head.insertAdjacentHTML("beforeend",OPACITY_CSS));
 
 // 5. Swipe: Biomes on one side, Indigenous Territories on the other (lesson step 9)
 let swipe=null;
@@ -612,7 +624,7 @@ const LAYERS=[
    legendTitle:"Indigenous Territories",
    legend:[{label:"One People's territory (each its own colour)",color:"#93A87A",shape:"square"},
            {label:"Overlap: colours blend",color:"#6E6A86",shape:"square"}],
-   popup:{title:"{Name}",content:(a)=>`This is the territory of the <b>${esc(a.Name)}</b> peoples.${a.description?` To learn more about this community and the sources used to draw this shape, or to suggest a correction, visit the <a href="${esc(a.description)}" target="_blank" rel="noopener">${esc(a.Name)} page on Native Land Digital</a>.`:""}<p class="hint" style="margin-top:6px"><i>Disclaimer: this map does not represent or intend to represent official or legal boundaries of any Indigenous Nation.</i></p>`},
+   popup:{title:"{Name}",content:(a)=>`This is the territory of the <b>${esc(a.Name)}</b> peoples.${a.description?` To learn more about this community and the sources used to draw this shape, or to suggest a correction, visit the <a href="${esc(a.description)}" target="_blank" rel="noopener">${esc(a.Name)} page on Native Land Digital</a>.`:""}`},
    sourceNote:"Native Land Digital territories (898 shapes), from the lesson's web map. Like the web map, this is a group layer: the vector tile layer (item f86d9dcd…) draws the territories and the feature layer supplies popups, labels and the claim counts. There is no built-in substitute for this layer."},
   {key:"biomes",title:"Biomes",visible:false,url:BIOMES_URL,opacity:.6,legend:BIOME_LEGEND,
    popup:{title:"{BIOME_NAME}",content:(a)=>`Ecoregion: <b>${esc(a.ECO_NAME)}</b><br>Realm: ${esc(a.REALM||"")}`},
@@ -640,7 +652,7 @@ const SECTIONS=[
  {id:"acquire",title:"Acquire",question:"Which regions have claims from the most Indigenous Peoples?",layers:["territories","rivers"],bookmark:"North America",
   intro:"<p>The lesson's bookmarks divide the United States into five regions. Visit each one and compare how many different territories you see.</p>",tasks:[
    {type:"custom",id:"acqTour",points:10,title:"Map task: tour the regions",text:"Use these buttons or the <b>Bookmarks</b> panel to visit all five regions.",render:regionTour},
-   {type:"detective",id:"acqDetective",title:"Homeland detective",deck:[
+   {type:"detective",id:"acqDetective",title:"Homeland detective",prompt:"What is the region of origin of {name}?",deck:[
       {n:"Chumash",lang:"wc",why:"Coast and Channel Islands around Santa Barbara, California."},
       {n:"Diné (Navajo)",lang:"w",why:"The Four Corners: Arizona, New Mexico and Utah."},
       {n:"Muscogee (Creek)",lang:"s",why:"Georgia and Alabama, before removal to Indian Territory (Oklahoma)."},
@@ -658,7 +670,7 @@ const SECTIONS=[
  ]},
  {id:"explore",title:"Explore",question:"What physical features do the crowded regions have in common?",layers:["territories","rivers"],bookmark:"West Coast",
   intro:"<p>The map is at the <b>West Coast</b> bookmark. Make the territories see-through so you can read the land underneath.</p>",tasks:[
-   {type:"custom",id:"expTransparency",points:10,goal:50,title:"Map task: adjust transparency",text:"Drag the slider to at least <b>50%</b> so the mountains, valleys, rivers and coastline on the basemap show through.",render:transparency},
+   {type:"custom",key:"explore",render:transparency}, // simple transparency slider, right under the intro (no points)
    {type:"click",id:"expRiver",points:10,title:"Map task: click a river",text:"Click a blue river line inside a crowded area (zoom in if the line is hard to hit).",layer:"rivers",
     success:c=>`<b>${esc(c.name)}</b>. Notice how many territories line up along it.`,banner:"<b>Map task:</b> click a blue river line."},
    {type:"multi",id:"expQ3",points:15,question:"<b>Question 3.</b> What physical features do the regions with many overlapping groups have in common? Select all that apply.",
@@ -682,7 +694,8 @@ const SECTIONS=[
    {type:"mcq",id:"anaQ4",points:10,question:"<b>Question 4.</b> Which biomes appear to have supported more Indigenous Peoples? Fewer?",
     choices:["More: deserts and tundra. Fewer: forests along the coasts","More: temperate conifer forests and Mediterranean woodlands of the Pacific coast, and temperate broadleaf forests of the East. Fewer: deserts, boreal forest (taiga) and tundra","About the same in every biome","More: boreal forest. Fewer: Mediterranean woodlands"],
     correct:1,explain:"Mild, well-watered forests and woodlands with plentiful food supported many communities in small territories. Dry deserts and the cold boreal forest and tundra supported fewer people spread across very large territories."},
-   {type:"button",id:"anaBiomesOff",points:5,label:"Turn off Biomes",layersOff:["biomes"],callout:"<b>Step 2:</b> turn off <b>Biomes</b>. Use the transparency slider from the Explore section again if it helps you see the land."},
+   {type:"button",id:"anaBiomesOff",points:5,label:"Turn off Biomes",layersOff:["biomes"],callout:"<b>Step 2:</b> turn off <b>Biomes</b>. Use this transparency slider if it helps you see the land."},
+   {type:"custom",key:"analyze",render:transparency},
    {type:"mcq",id:"anaQ5",points:10,question:"<b>Question 5.</b> How do land features (rivers, coasts, mountains and plains) help explain where Indigenous Peoples lived?",
     choices:["They don't: territories ignore the land","Rivers and coasts gave water, food and travel routes, so territories cluster along them; mountain ranges often formed edges between territories; on the open plains, Peoples followed bison across large territories","Peoples avoided rivers because of flooding","Peoples lived mainly on mountaintops for defence"],
     correct:1,explain:"Look at the Columbia River or Puget Sound: territories line the water. Ranges such as the Cascades and Sierra Nevada separate coastal Peoples from those of the interior, while the Great Plains hold big, overlapping territories of mobile bison hunters."}
@@ -709,14 +722,12 @@ const SECTIONS=[
    engine's dialog (focus trap, Escape closes, page behind is inert).
    --------------------------------------------------------------------- */
 const SPLASH=`<div class="splash">
-  <p class="splash-kicker">National Geographic MapMaker activity</p>
   <h2>Indigenous North America</h2>
   <p>What can we learn about the past and present of America by looking at maps? How have people, cultures and events shaped the places around this country? How have the natural features of the country shaped those people, cultures and events? In this MapMaker activity, you will explore maps to dive deeper into the people, places and challenges that created the United States.</p>
   <p>This map shows land claimed as the territory of different Indigenous Peoples. Each color on the map represents an Indigenous community that has lived on that land. It includes lands that Indigenous Peoples were forced to move to after the arrival of European settlers. Some of the groups claiming land had large populations, while other claims are from smaller, specific indigenous groups. Many Indigenous claims overlap creating the kaleidoscope effect on the map.</p>
   <div class="splash-actions"><button type="button" class="primary close splash-start">Start exploring</button></div>
 </div>
 <style>
-  .modal .splash-kicker{margin:0 0 4px;font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
   .modal .splash h2{font-size:2rem;margin:0 0 14px;padding-bottom:10px;border-bottom:4px solid var(--header-rule)}
   .modal .splash p{font-size:1.05rem;line-height:1.6}
   .modal .splash-actions{margin-top:20px;display:flex;justify-content:flex-end}
@@ -725,6 +736,7 @@ const SPLASH=`<div class="splash">
 if(typeof document!=="undefined") document.addEventListener("DOMContentLoaded",()=>{
   const api=window.GeoInquiry; if(!api||!api.openModal) return;
   api.openModal(SPLASH);
+  const x=document.querySelector("#modalBody > button.close:not(.splash-start)"); if(x) x.remove(); // splash only: "Start exploring" closes it
   const start=document.querySelector("#modalBody .splash-start"); if(start) start.focus({preventScroll:true});
   document.getElementById("modalBody").scrollTop=0; // small screens: open at the title, not the button
 });
@@ -751,6 +763,7 @@ window.ACTIVITY={
   title:"Indigenous North America",
   subtitle:"Based on the National Geographic MapMaker lesson · Indigenous territories, biomes and land",
   storageKey:"indigenousNorthAmericaState",
+  logo:{src:"data:image/webp;base64,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",alt:"GeoInquiries 2.0"}, // this app's icon (activities/indigenous-north-america-logo.png, 96 px, rounded)
   theme:{"--header":"#6B6B6B","--header-rule":"#FFD800","--accent":"#3D3D3D","--accent-hover":"#5A5A5A","--callout":"#F1F0EA"},
   map:{basemap:"terrain",center:[-98,40],zoom:4,minZoom:2,maxZoom:12,measure:false},
   bookmarks:BOOKMARKS,
@@ -1295,7 +1308,7 @@ TASKS.free=(container,{id,points,title,text,label,placeholder,minWords,options,b
   container.appendChild(card);
 };
 
-TASKS.detective=(container,{id,deck,langs,title,intro,perPoints})=>{
+TASKS.detective=(container,{id,deck,langs,title,intro,perPoints,prompt})=>{
   const per=perPoints||3, total=deck.length*per;
   const card=h(`<div class="task"><span class="pts">up to ${total} pts</span><h3>${title||"Name detective"}</h3><p class="hint">${intro||"Look for each name on the map, then choose its language of origin."} ${per} points per correct name.</p><div class="det"></div></div>`);
   container.appendChild(card); const area=card.querySelector(".det");
@@ -1308,7 +1321,8 @@ TASKS.detective=(container,{id,deck,langs,title,intro,perPoints})=>{
       return;
     }
     const item=deck[prog.index];
-    area.appendChild(h(`<p><b>${prog.index+1} of ${deck.length}:</b> What is the language of origin of <b>${esc(item.n)}</b>?</p>`));
+    const q=(prompt||"What is the language of origin of {name}?").replace("{name}",`<b>${esc(item.n)}</b>`); // optional per-task wording
+    area.appendChild(h(`<p><b>${prog.index+1} of ${deck.length}:</b> ${q}</p>`));
     const ch=h(`<div class="choices inline"></div>`);
     langs.forEach(k=>{
       const b=h(`<button type="button">${esc(labelOf(k).replace(" (Indigenous)",""))}</button>`);
