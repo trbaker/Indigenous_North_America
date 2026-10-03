@@ -715,6 +715,7 @@ window.ACTIVITY={
   title:"Indigenous North America",
   subtitle:"Based on the National Geographic MapMaker lesson · Indigenous territories, biomes and land",
   storageKey:"indigenousNorthAmericaState",
+  credit:"Original activity and map created by Esri/MapMaker",
   theme:{"--header":"#6B6B6B","--header-rule":"#FFD800","--accent":"#3D3D3D","--accent-hover":"#5A5A5A","--callout":"#F1F0EA"},
   map:{basemap:"terrain",center:[-98,40],zoom:4,minZoom:2,maxZoom:12,measure:false},
   bookmarks:BOOKMARKS,
@@ -1039,7 +1040,29 @@ function initMap(){
         });
         if(typeof A.onMapReady==="function") A.onMapReady(api);
       },(err)=>{ console.error(err); mapFailed(); });
-      view.on("click",(ev)=>{ if(map.clickHandler) map.clickHandler(ev); });
+      // Popups. A group layer's data sublayer is drawn transparent, and hit tests skip invisible
+      // features, so popups are built here: hit-test the drawn layers, then query each visible
+      // group's data layer at the click point (as ArcGIS Map Viewer does).
+      const hasGroups=Object.keys(map.tiles).length>0;
+      if(hasGroups) view.popupEnabled=false;
+      view.on("click",(ev)=>{
+        if(map.clickHandler) map.clickHandler(ev);
+        if(hasGroups) openPopupAt(ev);
+      });
+      async function openPopupAt(ev){
+        const seq=(map.popupSeq=(map.popupSeq||0)+1);
+        const groupKeys=Object.keys(map.query).filter(k=>map.tiles[k]&&map.layers[k]&&map.layers[k].visible);
+        const keyOf=(lyr)=>LAYERS.find(c=>map.layers[c.key]===lyr||map.query[c.key]===lyr);
+        let hits=[];
+        try{ const r=await view.hitTest(ev); hits=r.results.map(x=>x.graphic).filter(g=>g&&g.layer&&g.layer!==map.layers.__game&&(g.popupTemplate||g.layer.popupTemplate)); }catch(e){}
+        const queried=await Promise.all(groupKeys.map(k=>{ const Q=map.query[k];
+          return Q.queryFeatures({geometry:ev.mapPoint,spatialRelationship:"intersects",outFields:["*"],returnGeometry:true,maxAllowableOffset:view.resolution*2})
+            .then(res=>res.features.map(g=>{ g.layer=Q; g.popupTemplate=Q.popupTemplate; return g; })).catch(()=>[]); }));
+        if(seq!==map.popupSeq) return; // a newer click won
+        const order=(g)=>{ const c=keyOf(g.layer); return c?LAYERS.indexOf(c):-1; };
+        const feats=hits.filter(g=>!groupKeys.some(k=>g.layer===map.query[k])).concat(...queried).sort((a,b)=>order(a)-order(b));
+        if(feats.length) view.openPopup({features:feats,location:ev.mapPoint}); else view.closePopup();
+      }
       renderLayerList(); renderLegend();
     }catch(e){ console.error(e); mapFailed(); }
   }, function(err){ console.error(err); mapFailed(); });
@@ -1109,7 +1132,7 @@ function toggleMeasure(force){
   if(on&&map.ready&&!map.measure){ map.measure=new map.modules.DistanceMeasurement2D({view:map.view,unit:MAPCFG.measureUnit||"miles"}); map.view.ui.add(map.measure,"top-left"); map.measure.viewModel.start(); btn.classList.add("on"); btn.setAttribute("aria-pressed","true"); }
   else if(!on&&map.measure){ map.view.ui.remove(map.measure); map.measure.destroy(); map.measure=null; btn.classList.remove("on"); btn.setAttribute("aria-pressed","false"); }
 }
-function clearGame(){ if(map.layers.__game) map.layers.__game.removeAll(); map.clickHandler=null; map.onNoteOpen=null; banner(""); }
+function clearGame(){ if(map.layers.__game) map.layers.__game.removeAll(); map.clickHandler=null; map.onNoteOpen=null; banner(""); try{ if(map.view&&map.view.closePopup) map.view.closePopup(); }catch(e){} }
 function milesBetween(p1,p2){ const g=map.modules.geometryEngine, w=map.modules.wmUtils; const a=w.geographicToWebMercator(p1), b=w.geographicToWebMercator(p2); return g.geodesicLength({type:"polyline",paths:[[[a.x,a.y],[b.x,b.y]]],spatialReference:{wkid:3857}},"miles"); }
 // attribute accessors that work for live services and built-in layers alike
 const nameOf=(a)=>a.__name||a.name||a.NAME||a.Name||"";
@@ -1269,9 +1292,10 @@ TASKS.click=(container,{id,points,title,text,layer,test,success,fail,banner:bann
   banner(bannerText||`<b>Map task:</b> ${title}`);
   map.clickHandler=async(ev)=>{
     const L=map.layers[layer]; if(!L) return;
-    const hit=await map.view.hitTest(ev,{include:map.query[layer]||L});
-    const g=hit.results.find(r=>r.graphic&&r.graphic.attributes&&nameOf(r.graphic.attributes));
-    if(!g) return; const a=g.graphic.attributes; const ctx={name:nameOf(a),cls:clsOf(a,cfg),value:valueOf(a,cfg),attrs:a};
+    let a=null;
+    if(map.tiles[layer]&&map.query[layer]){ try{ const r=await map.query[layer].queryFeatures({geometry:ev.mapPoint,spatialRelationship:"intersects",outFields:["*"],returnGeometry:false}); const g=r.features.find(x=>nameOf(x.attributes)); a=g&&g.attributes; }catch(e){} }
+    else { const hit=await map.view.hitTest(ev,{include:L}); const g=hit.results.find(r=>r.graphic&&r.graphic.attributes&&nameOf(r.graphic.attributes)); a=g&&g.graphic.attributes; }
+    if(!a) return; const ctx={name:nameOf(a),cls:clsOf(a,cfg),value:valueOf(a,cfg),attrs:a};
     if(!test||test(ctx)){ const msg=success?success(ctx):`<b>${esc(ctx.name)}</b>`; fb(f,true,msg); state.answers[id]=msg.replace(/<[^>]+>/g,""); markTask(id,points,"points"); banner(""); map.clickHandler=null; }
     else fb(f,false,fail?fail(ctx):`${esc(ctx.name)} does not fit. Try again.`);
   };
@@ -1396,7 +1420,8 @@ document.addEventListener("keydown",e=>{
 const FOOTER=`
   <div class="modal-footer">
   <p class="footer-left"><a href="https://trbaker.github.io/geoinquiries" target="_blank" rel="noopener">GeoInquiries Lab</a></p>
-  <p class="footer-left">Designed by <a href="https://tbaker.com" target="_blank" rel="noopener">Tom Baker</a></p>
+  ${A.credit?`<p class="footer-left">${A.credit}</p>`:""}
+  <p class="footer-left">Redesigned by <a href="https://tbaker.com" target="_blank" rel="noopener">Tom Baker</a></p>
   <nav class="policy-links" aria-label="Policies"><a href="https://trbaker.github.io/geoinquiries/support/privacy.html" target="_blank" rel="noopener">Privacy</a><a href="https://trbaker.github.io/geoinquiries/support/accessibility.html" target="_blank" rel="noopener">Accessibility</a><a href="https://trbaker.github.io/geoinquiries/support/termsofuse.html" target="_blank" rel="noopener">Terms of use</a></nav>
   <p class="cc-badge"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="license noopener"><img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-nc-sa.svg" alt="Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license" width="88" height="31" onerror="this.replaceWith(Object.assign(document.createElement('b'),{textContent:'CC BY-NC-SA 4.0'}))"></a></p>
   </div>`;
